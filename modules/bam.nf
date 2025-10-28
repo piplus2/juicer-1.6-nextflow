@@ -14,7 +14,7 @@ process REMOVE_DUPLICATES_SAM {
     script:
     """
     filter_sam_by_readname.awk ${merged_nodups} ${merged_sorted_sam} | \\
-        samtools view -@ ${task.cpus} -bS - > nodup.bam
+        samtools view -@ ${task.cpus} -bS - > merged_nodups.bam
     """
 }
 
@@ -22,8 +22,6 @@ process MERGE_SORT_SAM {
     tag { sample }
     label "hpc"
     label "samtools"
-
-    publishDir "${params.output_dir}/${sample}/aligned", pattern: "*.sorted.sam"
 
     input:
     tuple val(sample), path(sam_list)
