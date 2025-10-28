@@ -68,7 +68,7 @@ for f in "${outputdir}/merged_nodups.txt" "${outputdir}/dups.txt" "${outputdir}/
     fi
 done
 
-if [ -z "$total" ] || [ -z "$total2" ] || [ "$total" -ne "$total2" ]
+if [ "$total" -eq 0 ] || [ "$total" -ne "$total2" ]
 then
     echo "***! Error! The sorted file and dups/no dups files do not add up, or were empty. Merge or dedupping likely failed, restart pipeline with -S merge or -S dedup"
     echo "Dups don't add up.  Check ${outputdir} for results"
