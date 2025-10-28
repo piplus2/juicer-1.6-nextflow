@@ -75,7 +75,7 @@ then
     exit 1
 fi
 
-wctotal=`awk '{sum+=$1} END {print sum/4}' ${splitdir}/*_linecount.txt`
+wctotal=$(awk '{sum+=$1} END {print sum/4}' ${splitdir}/*_linecount.txt)
 check2=$stats_total
  
 if [ "$wctotal" -ne "$check2" ]
