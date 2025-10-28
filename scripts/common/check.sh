@@ -27,34 +27,58 @@
 # proceeded appropriately, and that files were created
 # Juicer version 1.5
 
-# Start by checking the statistics to see if they add up 
-res1=`cat ${splitdir}/*norm*res*`
-check1=`cat ${splitdir}/*norm*res* | awk '{s2+=$2; s3+=$3; s4+=$4; s5+=$5; s6+=$6}END{if (s2 != s3+s4+s5+s6){print 0}else{print 1}}'`
-if [ $check1 -eq 0 ] || [ -z "$res1" ]
-then
-    echo "***! Error! The statistics do not add up. Alignment likely failed to complete on one or more files. Run relaunch_prep.sh"
-    echo "Stats don't add up.  Check ${outputdir} for results"
-    exit 1
-fi
+# Start by checking the statistics to see if they add up
+stats_total=$(awk '{s2+=$2; s3+=$3; s4+=$4; s5+=$5; s6+=$6}
+    END {
+        if (NR == 0) {
+            exit 2;
+        }
+        if (s2 != s3 + s4 + s5 + s6) {
+            exit 1;
+        }
+        print s2;
+    }' ${splitdir}/*norm*res*)
+case $? in
+    0)
+        :
+        ;;
+    1)
+        echo "***! Error! The statistics do not add up. Alignment likely failed to complete on one or more files. Run relaunch_prep.sh"
+        echo "Stats don't add up.  Check ${outputdir} for results"
+        exit 1
+        ;;
+    *)
+        echo "***! Error! No statistics were generated. Alignment likely failed to complete on one or more files. Run relaunch_prep.sh"
+        echo "Stats were not generated.  Check ${outputdir} for results"
+        exit 1
+        ;;
+esac
 
 # Check the sizes of merged_sort versus the dups/no dups files to be sure
 # no reads were lost
-total=1
+total=0
 total2=0
-total=`ls -l ${outputdir}/merged_sort.txt | awk '{print $5}'`
-total2=`ls -l ${outputdir}/merged_nodups.txt ${outputdir}/dups.txt ${outputdir}/opt_dups.txt | awk '{sum = sum + $5}END{print sum}'`
+if [ -f "${outputdir}/merged_sort.txt" ]; then
+    total=$(wc -c < "${outputdir}/merged_sort.txt")
+fi
+for f in "${outputdir}/merged_nodups.txt" "${outputdir}/dups.txt" "${outputdir}/opt_dups.txt"; do
+    if [ -f "$f" ]; then
+        size=$(wc -c < "$f")
+        total2=$((total2 + size))
+    fi
+done
 
-if [ -z $total ] || [ -z $total2 ] || [ $total -ne $total2 ]
+if [ -z "$total" ] || [ -z "$total2" ] || [ "$total" -ne "$total2" ]
 then
     echo "***! Error! The sorted file and dups/no dups files do not add up, or were empty. Merge or dedupping likely failed, restart pipeline with -S merge or -S dedup"
     echo "Dups don't add up.  Check ${outputdir} for results"
     exit 1
 fi
 
-wctotal=`cat ${splitdir}/*_linecount.txt | awk '{sum+=$1}END{print sum/4}'`
-check2=`cat ${splitdir}/*norm*res* | awk '{s2+=$2;}END{print s2}'`
+wctotal=`awk '{sum+=$1} END {print sum/4}' ${splitdir}/*_linecount.txt`
+check2=$stats_total
  
-if [ $wctotal -ne $check2 ]
+if [ "$wctotal" -ne "$check2" ]
 then
     echo "***! Error! The number of reads in the fastqs (${wctotal}) is not the same as the number of reads reported in the stats (${check2}), likely due to a failure during alignment"
     echo "Reads don't add up.  Check ${outputdir} for results"
