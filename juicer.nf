@@ -23,22 +23,15 @@ workflow {
             tuple(sample, pair_id, sorted_reads[0], sorted_reads[1])
         }
 
-    // Split channel consumption between header generation and fragment processing
-    def fastq_for_header = null
-    def fastq_for_processing = null
-    fastq_pairs.into {
-        fastq_for_header
-        fastq_for_processing
-    }
 
     // Create one header file for each sample
     out_header = MAKE_HEADERFILE(
-        fastq_for_header.map { sample, _pair_id, _read1, _read2 -> sample }.distinct()
+        fastq_pairs.map { sample, _pair_id, _read1, _read2 -> sample }.distinct()
     )
 
     /* --------------- Process sample fragments (paired fastq) -------------- */
 
-    frag_results = process_fragments(fastq_for_processing)
+    frag_results = process_fragments(fastq_pairs)
 
     chimeric_reads = frag_results.chimeric_output
     sorted_fragments = frag_results.sorted_fragments
