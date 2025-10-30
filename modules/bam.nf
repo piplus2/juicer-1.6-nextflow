@@ -1,20 +1,35 @@
 process REMOVE_DUPLICATES_SAM {
     tag { sample }
     label "hpc"
-    label "samtools"
-
-    publishDir "${params.output_dir}/${sample}/aligned", pattern: "*.bam"
 
     input:
     tuple val(sample), path(merged_nodups), path(merged_sorted_sam)
 
     output:
-    path "merged_nodups.bam", emit: alignable
+    tuple val(sample), path("dedup.sam")
 
     script:
     """
-    filter_sam_by_readname.awk ${merged_nodups} ${merged_sorted_sam} | \\
-        samtools view -@ ${task.cpus} -bS - > merged_nodups.bam
+    filter_sam_by_readname.awk ${merged_nodups} ${merged_sorted_sam} > dedup.sam
+    """
+}
+
+process SAM_TO_BAM {
+    tag { sample }
+    label "hpc"
+    label "samtools"
+
+    publishDir "${params.output_dir}/${sample}/aligned", pattern: "*.bam", mode: 'copy'
+
+    input:
+    tuple val(sample), path(sam_file)
+
+    output:
+    tuple val(sample), path("${sam_file.baseName}.bam")
+
+    script:
+    """
+    samtools view -@ ${task.cpus} -bS ${sam_file} -o ${sam_file.baseName}.bam
     """
 }
 
@@ -27,7 +42,7 @@ process MERGE_SORT_SAM {
     tuple val(sample), path(sam_list)
 
     output:
-    path "merged.sorted.sam", emit: merged_sorted_bam
+    tuple val(sample), path("merged.sorted.sam")
 
     script:
     """

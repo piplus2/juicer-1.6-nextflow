@@ -6,8 +6,7 @@ process ARROWHEAD {
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
 
     input:
-    val sample
-    path inter_30_hic
+    tuple val(sample), path(inter_30_hic)
 
     output:
     path "${inter_30_hic.simpleName}_contact_domains", type: 'dir'
@@ -39,11 +38,10 @@ process HICCUPS {
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
 
     input:
-    val sample
-    path inter_30_hic
+    tuple val(sample), path(inter_30_hic)
 
     output:
-    path "${inter_30_hic.simpleName}_loops", type: 'dir', emit: inter_30_loops
+    tuple val(sample), path(inter_30_hic), path("${inter_30_hic.simpleName}_loops", type: 'dir')
 
     script:
     def out_loops = "${inter_30_hic.simpleName}_loops"
@@ -79,9 +77,7 @@ process MOTIF_FINDER {
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
 
     input:
-    val sample
-    path inter_30_hic
-    path merged_loops_dir
+    tuple val(sample), path(inter_30_hic), path(merged_loops_dir)
 
     output:
     path "apa_results", type: 'dir'
@@ -124,18 +120,16 @@ workflow postprocessing {
     inter_30
 
     main:
-    def sample = inter_30.take(0)
-    def inter_30_hic = inter_30.take(1)
 
-    ARROWHEAD(sample, inter_30_hic)
+    ARROWHEAD(inter_30)
 
-    loops_dir = HICCUPS(sample, inter_30_hic)
+    loops_dir = HICCUPS(inter_30)
     // Keep the loops dirs that contain the file merged_loops.bedpe
-    good_loops_dir = loops_dir.filter { it ->
-        file("${it}/merged_loops.bedpe").exists()
+    good_loops_dir = loops_dir.filter { _sample, _inter_30, _loops_dir ->
+        file("${_loops_dir}/merged_loops.bedpe").exists()
     }
 
-    MOTIF_FINDER(sample, inter_30_hic, good_loops_dir)
+    MOTIF_FINDER(good_loops_dir)
 
     emit:
     null

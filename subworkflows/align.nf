@@ -8,8 +8,7 @@ process COUNT_LIGATIONS {
     tuple val(sample), val(name), path(read1), path(read2)
 
     output:
-    path ("${name}${params.ext}_initial_norm.txt.res.txt"), emit: init_norm_res
-    path ("${name}${params.ext}_linecount.txt"), emit: linecount
+    tuple val(sample), val(name), path("${name}${params.ext}_initial_norm.txt.res.txt"), path("${name}${params.ext}_linecount.txt")
 
     script:
     def output_norm_txt = "${name}${params.ext}_initial_norm.txt.res.txt"
@@ -57,7 +56,7 @@ process BWA_ALIGN {
     tuple val(sample), val(name), path(read1), path(read2)
 
     output:
-    path ("${name}${params.ext}.sam"), emit: aligned_sam
+    tuple val(sample), val(name), path("${name}${params.ext}.sam")
 
     script:
     def output_aligned = "${name}${params.ext}.sam"
@@ -78,7 +77,7 @@ process FRAGMENT {
     tuple val(sample), val(name), path(norm_txt)
 
     output:
-    path "${name}${params.ext}.frag.txt", emit: frag_txt
+    tuple val(sample), val(name), path("${name}${params.ext}.frag.txt")
 
     script:
     def output_frag_txt = "${name}${params.ext}.frag.txt"
@@ -105,12 +104,10 @@ process SORT {
     publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
 
     input:
-    val sample
-    val name
-    path frag_txt
+    tuple val(sample), val(name), path(frag_txt)
 
     output:
-    path "${name}${params.ext}_sort.txt", emit: sorted_frag_txt
+    tuple val(sample), path("${name}${params.ext}_sort.txt")
 
     script:
     def tmpdir = "HIC_tmp"
@@ -132,17 +129,10 @@ process CHIMERIC {
     publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
 
     input:
-    val sample
-    val name
-    path aligned_sam
-    path norm_res_txt_initial
+    tuple val(sample), val(name), path(aligned_sam), path(norm_res_txt_initial)
 
     output:
-    path "${name}${params.ext}_norm.txt", emit: norm_txt
-    path "${name}${params.ext}_abnorm.sam", emit: abnorm_sam
-    path "${name}${params.ext}_unmapped.sam", emit: unmapped_sam
-    path "${name}${params.ext}_norm.sam", emit: norm_sam
-    path "${name}${params.ext}_norm.txt.res.txt", emit: norm_res_txt
+    tuple val(sample), val(name), path("${name}${params.ext}_norm.txt"), path("${name}${params.ext}_abnorm.sam"), path("${name}${params.ext}_unmapped.sam"), path("${name}${params.ext}_norm.sam"), path("${name}${params.ext}_norm.txt.res.txt")
 
     script:
     def output_norm = "${name}${params.ext}_norm.txt"
@@ -168,30 +158,37 @@ workflow process_fragments {
     reads
 
     main:
-    sample = reads.map { it -> it[0] }
-    name = reads.map { it -> it[1] }
 
-    init_norm_res = COUNT_LIGATIONS(reads).init_norm_res
-    aligned = BWA_ALIGN(reads).aligned_sam
-    CHIMERIC(sample, name, aligned, init_norm_res)
+    // output = (sample, name, init_norm_res, linecount)
+    init_norm_res = COUNT_LIGATIONS(reads)
 
-    // Create the final chimeric output channel: (sample, name, Path1, Path2, Path3, Path4)
-    def chimeric_output_channel = CHIMERIC.out.norm_txt
-        .join(CHIMERIC.out.abnorm_sam)
-        .join(CHIMERIC.out.unmapped_sam)
-        .join(CHIMERIC.out.norm_res_txt)
-        .join(CHIMERIC.out.norm_sam)
-        .map { norm_txt, abnorm_sam, unmapped_sam, norm_res_txt, norm_sam ->
-            tuple(sample, name, norm_txt, abnorm_sam, unmapped_sam, norm_res_txt, norm_sam)
+    // output = (sample, name, aligned_sam)
+    aligned_sams = BWA_ALIGN(reads)
+
+    // Prepare CHIMERIC inputs
+    chimeric_input_ch = init_norm_res
+        .map { sample, name, norm_res_txt, _linecount ->
+            tuple(sample, name, norm_res_txt)
         }
+        .join(aligned_sams, by: [0, 1])
 
-    frag_txt = FRAGMENT(chimeric_output_channel.map { it -> it[0..2] }).frag_txt
-    SORT(sample, name, frag_txt)
-    sorted_fragments_channel = SORT.out.sorted_frag_txt.map { it ->
-        tuple(sample, it)
+    chimeric_input_ch = chimeric_input_ch.map { sample, name, norm_txt, aligned_sam ->
+        tuple(sample, name, aligned_sam, norm_txt)
     }
 
+    chimeric_input_ch.collect().view()
+
+    // output = (sample, name, norm_txt, abnorm_sam, unmapped_sam, norm_sam, norm_res_txt)
+    chimeric = CHIMERIC(chimeric_input_ch)
+
+    fragment_input_ch = chimeric.map { sample, name, norm_txt, _abnorm_sam, _unmapped_sam, _norm_sam, _norm_res_txt ->
+        tuple(sample, name, norm_txt)
+    }
+
+    // output = (sample, sort_txt)
+    sorted_files = SORT(FRAGMENT(fragment_input_ch))
+
     emit:
-    chimeric_output  = chimeric_output_channel
-    sorted_fragments = sorted_fragments_channel
+    chimeric_output  = chimeric
+    sorted_fragments = sorted_files
 }

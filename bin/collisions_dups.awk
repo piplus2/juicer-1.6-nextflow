@@ -1,3 +1,4 @@
+#!/usr/bin/awk -f
 # Returns absolute value of v
 function abs(v) {
   return v<0?-v:v;
@@ -29,7 +30,7 @@ NF != 0{
   else {
     split(prev, p);
     test=1;
-    # this code is testing that strand and chromosomes match 
+    # this code is testing that strand and chromosomes match
     # NEVA: make sure we are sorting by strand as well .... prob. in GAWK as well as sort
     for (i=2; i<=NF; i=i+7) {
       test=and(test, ($i == p[i]));

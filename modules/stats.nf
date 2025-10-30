@@ -23,7 +23,7 @@ process STATS {
     mkdir -p aligned
 
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter}
-    cat ${res_txts.join(' ')} | awk -f stats_sub.awk >> ${inter}
+    cat ${res_txts.join(' ')} | stats_sub.awk >> ${inter}
     juicer_tools LibraryComplexity aligned ${inter} >> ${inter}
 
     cp ${inter} ${inter_30}
@@ -36,11 +36,11 @@ process STATS {
     cat ${abnorm_sams.join(' ')} > ${abnorm_sam}
     cat ${unmapped_sams.join(' ')} > ${unmapped_sam}
 
-    awk -f collisions.awk ${abnorm_sam} > ${collisions}
+    collisions.awk ${abnorm_sam} > ${collisions}
 
-    gawk -v fname=${collisions} \\
-        -f collisions_dedup_rearrange_cols.awk ${collisions} \\
+    collisions_dedup_rearrange_cols.awk -v fname=${collisions} \\
+        ${collisions} \\
         | sort -k3,3n -k4,4n -k10,10n -k11,11n -k17,17n -k18,18n -k24,24n -k25,25n -k31,31n -k32,32n \\
-        | awk -v name=. -f collisions_dups.awk
+        | collisions_dups.awk -v name=.
     """
 }
