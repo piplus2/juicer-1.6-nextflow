@@ -60,7 +60,7 @@ process HICCUPS {
         --ignore-sparsity \\
         ${resolutions} \\
         ${inter_30_hic} \\
-        ${out_loops} \\
+        ${out_loops}
     else
         echo "ERROR: GPUs are required for HiCCUPS, but CUDA is not available." >&2
         exit 1
