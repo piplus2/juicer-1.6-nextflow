@@ -45,8 +45,10 @@ process MERGE_SORT_SAM {
     tuple val(sample), path("merged.sorted.sam")
 
     script:
+    def sam_files = sam_list instanceof List ? sam_list : [sam_list]
+    def sam_inputs = sam_files.collect { it.toString() }.join(' ')
     """
-    samtools merge -@ ${task.cpus} -n merged.sam ${sam_list}
+    samtools merge -@ ${task.cpus} -n merged.sam ${sam_inputs}
     samtools sort -@ ${task.cpus} -n -o merged.sorted.sam merged.sam
     """
 }
