@@ -50,13 +50,13 @@ process HICCUPS {
     mkdir -p ${out_loops}
 
     if hash nvcc 2> /dev/null; then
-        args=(--threads 0 --ignore-sparsity)
+        args="--threads 0 --ignore-sparsity"
         if [[ -n "${params.resolutions}" ]]; then
-            args+=(-r "${params.resolutions}")
+            args+="-r \"${params.resolutions}\""
         fi
-        args+=("${inter_30_hic}" "${out_loops}")
+        args+="\"${inter_30_hic}\" \"${out_loops}\""
 
-        juicer_tools hiccups "${args[@]}"
+        juicer_tools hiccups ${args}
     else
         echo "ERROR: GPUs are required for HiCCUPS, but CUDA is not available." >&2
         exit 1

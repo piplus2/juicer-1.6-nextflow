@@ -28,13 +28,13 @@ process STATS {
 
     cp ${inter} ${inter_30}
 
-    stat_cmd=(statistics.pl)
+    stat_cmd="statistics.pl"
     if [[ -n "${params.site_file}" ]]; then
-        stat_cmd+=(-s "${params.site_file}")
+        stat_cmd+=" -s \"${params.site_file}\""
     fi
-    stat_cmd+=(-l "${params.ligation}" -o "${inter}" -q 1 "${merged_nodups}")
+    stat_cmd+=" -l \"${params.ligation}\" -o \"${inter}\" -q 1 \"${merged_nodups}\""
 
-    "${stat_cmd[@]}"
+    eval "\${stat_cmd}"
 
     cat ${abnorm_sams.join(' ')} > ${abnorm_sam}
     cat ${unmapped_sams.join(' ')} > ${unmapped_sam}
