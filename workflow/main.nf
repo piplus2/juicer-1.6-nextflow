@@ -115,7 +115,7 @@ workflow NFCORE_JUICER {
                 tuple(sample, norm_sam)
             }
             .groupTuple(by: 0)
-            .map { sample, sams -> tuple(sample, sams.join(' ')) }
+            .map { sample, sams -> tuple(sample, sams) }
 
         merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
         merged_nodups_by_sample = nodups.join(merged_sam)
