@@ -1,0 +1,3 @@
+sample,name,fastq_1,fastq_2
+# Replace the example paths with real test data before running the test profile.
+#sampleA,sampleA,tests/data/sampleA_R1.fastq.gz,tests/data/sampleA_R2.fastq.gz

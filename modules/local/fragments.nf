@@ -2,7 +2,7 @@ process MERGE_SORT {
     tag "${sample}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     tuple val(sample), path(sort_files)
@@ -28,7 +28,7 @@ process REMOVE_DUPLICATES {
     tag "${sample}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     tuple val(sample), path(merged_sort)

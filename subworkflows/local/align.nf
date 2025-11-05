@@ -2,7 +2,7 @@ process COUNT_LIGATIONS {
     tag "${sample}-${name}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
     tuple val(sample), val(name), path(read1), path(read2)
@@ -50,7 +50,7 @@ process BWA_ALIGN {
 
     container "docker://pinglese6022/bwa-mem2:2.3"
 
-    publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
     tuple val(sample), val(name), path(read1), path(read2)
@@ -61,7 +61,7 @@ process BWA_ALIGN {
     script:
     def output_aligned = "${name}${params.ext}.sam"
     """
-    bwa-mem2 mem -SP5M -t ${params.threads} ${params.refSeq} \\
+    bwa-mem2 mem -SP5M -t ${task.cpus} ${params.reference} \\
         ${read1} ${read2} > ${output_aligned}
     """
 }
@@ -71,7 +71,7 @@ process FRAGMENT {
     tag "${sample}-${name}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
     tuple val(sample), val(name), path(norm_txt)
@@ -101,7 +101,7 @@ process SORT {
     tag "${sample}-${name}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
     tuple val(sample), val(name), path(frag_txt)
@@ -126,7 +126,7 @@ process CHIMERIC {
     tag "${sample}-${name}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/splits", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
     tuple val(sample), val(name), path(aligned_sam), path(norm_res_txt_initial)
@@ -175,8 +175,6 @@ workflow process_fragments {
     chimeric_input_ch = chimeric_input_ch.map { sample, name, norm_txt, aligned_sam ->
         tuple(sample, name, aligned_sam, norm_txt)
     }
-
-    chimeric_input_ch.collect().view()
 
     // output = (sample, name, norm_txt, abnorm_sam, unmapped_sam, norm_sam, norm_res_txt)
     chimeric = CHIMERIC(chimeric_input_ch)

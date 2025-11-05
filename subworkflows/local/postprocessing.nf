@@ -3,7 +3,7 @@ process ARROWHEAD {
     tag "${sample}"
     label "gpu"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     tuple val(sample), path(inter_30_hic)
@@ -16,8 +16,6 @@ process ARROWHEAD {
     """
     export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
-    export JAVA_HOME=/work/pinglese/tools/jdk-17.0.14
-    export PATH=\${JAVA_HOME}/bin:\${PATH}
 
     mkdir -p ${contact_domains}
 
@@ -35,7 +33,7 @@ process HICCUPS {
     tag "${sample}"
     label "gpu"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
 
     input:
     tuple val(sample), path(inter_30_hic)
@@ -45,22 +43,20 @@ process HICCUPS {
 
     script:
     def out_loops = "${inter_30_hic.simpleName}_loops"
-    def resolutions = params.resolutions == null || params.resolutions.toString() == "" ? "" : "-r ${params.resolutions}"
     """
     export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
-    export JAVA_HOME=/work/pinglese/tools/jdk-17.0.14
-    export PATH=\${JAVA_HOME}/bin:\${PATH}
 
     mkdir -p ${out_loops}
 
     if hash nvcc 2> /dev/null; then
-        juicer_tools hiccups \\
-        --threads 0 \\
-        --ignore-sparsity \\
-        ${resolutions} \\
-        ${inter_30_hic} \\
-        ${out_loops}
+        args=(--threads 0 --ignore-sparsity)
+        if [[ -n "${params.resolutions}" ]]; then
+            args+=(-r "${params.resolutions}")
+        fi
+        args+=("${inter_30_hic}" "${out_loops}")
+
+        juicer_tools hiccups "${args[@]}"
     else
         echo "ERROR: GPUs are required for HiCCUPS, but CUDA is not available." >&2
         exit 1
@@ -74,7 +70,7 @@ process MOTIF_FINDER {
     tag "${sample}"
     label "gpu"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     tuple val(sample), path(inter_30_hic), path(merged_loops_dir)
@@ -89,9 +85,6 @@ process MOTIF_FINDER {
     """
     export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
-
-    export JAVA_HOME=/work/pinglese/tools/jdk-17.0.14
-    export PATH=\${JAVA_HOME}/bin:\${PATH}
     mkdir -p "apa_results"
 
     cp ${merged_loops_dir}/merged_loops.bedpe ${loops_txt}
@@ -108,9 +101,9 @@ process MOTIF_FINDER {
         touch ${loops_txt}
     else
         juicer_tools motifs \\
-            ${params.genomeID} \\
+            ${params.genome_id} \\
             ${motif_dir} \\
-            ${loops_txt} \\
+            ${loops_txt}
     fi
     """
 }
