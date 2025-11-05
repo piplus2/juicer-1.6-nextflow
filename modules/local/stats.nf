@@ -2,7 +2,7 @@ process STATS {
     tag "${sample}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     tuple val(sample), path(header), path(res_txts), path(abnorm_sams), path(unmapped_sams), path(merged_nodups)
@@ -28,10 +28,13 @@ process STATS {
 
     cp ${inter} ${inter_30}
 
-    statistics.pl \\
-        -s ${params.site_file} \\
-        -l ${params.ligation} \\
-        -o ${inter} -q 1 ${merged_nodups}
+    stat_cmd=(statistics.pl)
+    if [[ -n "${params.site_file}" ]]; then
+        stat_cmd+=(-s "${params.site_file}")
+    fi
+    stat_cmd+=(-l "${params.ligation}" -o "${inter}" -q 1 "${merged_nodups}")
+
+    "${stat_cmd[@]}"
 
     cat ${abnorm_sams.join(' ')} > ${abnorm_sam}
     cat ${unmapped_sams.join(' ')} > ${unmapped_sam}

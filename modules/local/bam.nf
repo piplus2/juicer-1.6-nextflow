@@ -19,7 +19,7 @@ process SAM_TO_BAM {
     label "hpc"
     label "samtools"
 
-    publishDir "${params.output_dir}/${sample}/aligned", pattern: "*.bam", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", pattern: "*.bam", mode: 'copy'
 
     input:
     tuple val(sample), path(sam_file)

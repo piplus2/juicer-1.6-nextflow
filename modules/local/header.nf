@@ -2,7 +2,7 @@ process MAKE_HEADERFILE {
     tag "${sample}"
     label "hpc"
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     val sample

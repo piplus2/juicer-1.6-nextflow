@@ -1,0 +1,154 @@
+nextflow.enable.dsl = 2
+
+import nextflow.Channel
+
+include { process_fragments     } from '../subworkflows/local/align.nf'
+include { postprocessing        } from '../subworkflows/local/postprocessing.nf'
+include { REMOVE_DUPLICATES_SAM ; SAM_TO_BAM } from '../modules/local/bam.nf'
+include { GEN_HIC_FILES         } from '../modules/local/hic.nf'
+include { STATS                 } from '../modules/local/stats.nf'
+include { MAKE_HEADERFILE       } from '../modules/local/header.nf'
+include { MERGE_SORT ; REMOVE_DUPLICATES } from '../modules/local/fragments.nf'
+include { MERGE_SORT_SAM        } from '../modules/local/bam.nf'
+
+private Channel buildFastqChannel() {
+    if (!params.input) {
+        exit 1, "No input samplesheet provided. Please specify with --input"
+    }
+
+    def readSuffix = "${params.readstr1 ?: ''}${params.ext ?: ''}"
+
+    Channel.fromPath(params.input)
+        .ifEmpty { exit 1, "Input samplesheet not found: ${params.input}" }
+        .splitCsv(header: true)
+        .map { row ->
+            def firstEntry = row.values().find { it != null && it.toString().trim() }
+            if (!firstEntry) {
+                return null
+            }
+            if (firstEntry.toString().trim().startsWith('#')) {
+                return null
+            }
+            return row
+        }
+        .filter { it != null }
+        .ifEmpty { exit 1, "Samplesheet ${params.input} does not contain any usable records" }
+        .map { row ->
+            def sample = (row.sample ?: row.Sample ?: row.sample_id ?: row.Sample_ID)?.toString()?.trim()
+            def name   = (row.name ?: row.Name ?: row.library ?: row.Library)?.toString()?.trim()
+            def fastq1 = (row.fastq_1 ?: row.fastq1 ?: row.read1 ?: row.r1)?.toString()?.trim()
+            def fastq2 = (row.fastq_2 ?: row.fastq2 ?: row.read2 ?: row.r2)?.toString()?.trim()
+
+            if (!sample) {
+                exit 1, "Samplesheet is missing a 'sample' column entry"
+            }
+            if (!fastq1 || !fastq2) {
+                exit 1, "Samplesheet entry for sample '${sample}' is missing FASTQ paths"
+            }
+
+            def fq1Path = file(fastq1)
+            def fq2Path = file(fastq2)
+
+            if (!fq1Path.exists()) {
+                exit 1, "FASTQ file not found: ${fastq1}"
+            }
+            if (!fq2Path.exists()) {
+                exit 1, "FASTQ file not found: ${fastq2}"
+            }
+
+            if (!name) {
+                def fqName = fq1Path.getFileName().toString()
+                if (readSuffix && fqName.endsWith(readSuffix)) {
+                    name = fqName[0..<(fqName.length() - readSuffix.length())]
+                } else {
+                    name = fqName.replaceAll(/(_R1|_1)([^_\.]*)?$/, '')
+                }
+            }
+
+            tuple(sample, name, fq1Path, fq2Path)
+        }
+        .share()
+}
+
+private void validateParameters() {
+    if (!params.reference) {
+        exit 1, "Parameter --reference is required"
+    }
+
+    def referencePath = file(params.reference)
+    if (!referencePath.exists()) {
+        exit 1, "Reference FASTA not found: ${params.reference}"
+    }
+
+    params.reference = referencePath
+
+    if (!params.genome_id) {
+        exit 1, "Parameter --genome_id is required"
+    }
+}
+
+workflow NFCORE_JUICER {
+    main:
+        validateParameters()
+        fastq_pairs = buildFastqChannel()
+
+        out_header = MAKE_HEADERFILE(
+            fastq_pairs.map { sample, _name, _read1, _read2 -> sample }.distinct()
+        )
+
+        frag_results = process_fragments(fastq_pairs)
+
+        chimeric_reads   = frag_results.chimeric_output
+        sorted_fragments = frag_results.sorted_fragments
+
+        sort_files_by_sample = sorted_fragments.groupTuple(by: 0)
+
+        merged_sort = MERGE_SORT(sort_files_by_sample)
+
+        merged_nodups = REMOVE_DUPLICATES(merged_sort)
+        nodups = merged_nodups.map { sample, merged_nodups_txt, _dups_txt, _opt_dups_txt ->
+            tuple(sample, merged_nodups_txt)
+        }
+
+        norm_sam_by_sample = chimeric_reads
+            .map { sample, _name, _norm_txt, _abnorm_sam, _unmapped_sam, norm_sam, _norm_res_txt ->
+                tuple(sample, norm_sam)
+            }
+            .groupTuple(by: 0)
+            .map { sample, sams -> tuple(sample, sams.join(' ')) }
+
+        merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
+        merged_nodups_by_sample = nodups.join(merged_sam)
+
+        SAM_TO_BAM(REMOVE_DUPLICATES_SAM(merged_nodups_by_sample))
+
+        chimeric_by_sample = chimeric_reads
+            .map { sample, _name, _norm_txt, abnorm_sam, unmapped_sam, _norm_sam, norm_res_txt ->
+                tuple(sample, norm_res_txt, abnorm_sam, unmapped_sam)
+            }
+            .groupTuple(by: 0)
+
+        stats_input = out_header
+            .join(chimeric_by_sample)
+            .join(nodups)
+
+        stats_output = STATS(stats_input)
+
+        hic_input = stats_output
+            .map { sample, inter, inter_30, inter_hists, _collisions, _abnorm_sam, _unmapped_sam ->
+                tuple(sample, inter, inter_30, inter_hists)
+            }
+            .join(nodups, failOnMismatch: true)
+
+        hic_out_ch = GEN_HIC_FILES(hic_input)
+
+        inter_30_hic = hic_out_ch.map { sample, _inter_hic, inter_30_hic_file, _inter_30_hists ->
+            tuple(sample, inter_30_hic_file)
+        }
+
+        postprocessing(inter_30_hic)
+
+    emit:
+        stats = stats_output
+        hic   = hic_out_ch
+}
