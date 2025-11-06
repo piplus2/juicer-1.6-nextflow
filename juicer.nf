@@ -3,7 +3,7 @@ nextflow.enable.dsl = 2
 include { process_fragments     } from './subworkflows/align.nf'
 include { postprocessing        } from './subworkflows/postprocessing.nf'
 include { REMOVE_DUPLICATES_SAM ; SAM_TO_BAM } from './modules/bam.nf'
-include { GEN_HIC_FILES         } from './modules/hic.nf'
+include { GEN_HIC_FILES ; hic } from './modules/hic.nf'
 include { STATS                 } from './modules/stats.nf'
 include { MAKE_HEADERFILE       } from './modules/header.nf'
 include { MERGE_SORT ; REMOVE_DUPLICATES } from './modules/fragments.nf'
@@ -92,16 +92,17 @@ workflow {
     // (sample, inter.hic, inter_30.hic, inter_hists_30)
 
     hic_input = stats_output
-        .map { sample, inter, inter_30, inter_hists, _collisions, _abnorm_sam, _unmapped_sam ->
-            tuple(sample, inter, inter_30, inter_hists)
+        .map { sample, inter_txt, inter_30_txt, inter_hists, _collisions, _abnorm_sam, _unmapped_sam ->
+            tuple(sample, inter_txt, inter_30_txt, inter_hists)
         }
-        .join(nodups, failOnMismatch: true)
+        .join(nodups, by: 0)
 
-    hic_out_ch = GEN_HIC_FILES(hic_input)
+    // hic_out_ch = GEN_HIC_FILES(hic_input)
 
-    inter_30_hic = hic_out_ch.map { sample, _inter_hic, inter_30_hic_file, _inter_30_hists ->
-        tuple(sample, inter_30_hic_file)
-    }
+    // inter_30_hic = hic_out_ch.map { sample, _inter_hic, inter_30_hic_file, _inter_30_hists ->
+    //     tuple(sample, inter_30_hic_file)
+    // }
+    inter_30_hic = hic(hic_input)
 
     /* --------------------------- Postprocessing --------------------------- */
 
