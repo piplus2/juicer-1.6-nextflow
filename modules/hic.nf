@@ -96,23 +96,23 @@ process JUICER_TOOLS_PRE_Q30 {
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
 
     input:
-    tuple val(sample), path(merged_no_dups), path(inter_30), path(inter_hists)
+    tuple val(sample), path(merged_no_dups), path(inter_30_txt), path(inter_30_hists_m)
 
     output:
-    tuple val(sample), path("${inter_30.baseName}.hic")
+    tuple val(sample), path("${inter_30_txt.baseName}.hic")
 
     script:
     def site_opt = params.nofrag.toString() == "1" ? "" : "-f ${params.site_file}"
     def resolutions = params.resolutions == null || params.resolutions.toString() == "" ? "" : "-r ${params.resolutions}"
-    def output_file = "${inter_30.baseName}.hic"
+    def output_file = "${inter_30_txt.baseName}.hic"
     """
     export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
 
     juicer_tools pre \\
         ${site_opt} \\
-        -s ${inter_30} \\
-        -g ${inter_hists} \\
+        -s ${inter_30_txt} \\
+        -g ${inter_30_hists_m} \\
         -q 30 \\
         ${resolutions} \\
         ${merged_no_dups} \\
@@ -130,24 +130,24 @@ process HIC_STATS {
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
 
     input:
-    tuple val(sample), path(inter_30), path(merged_nodups)
+    tuple val(sample), path(inter_30_txt), path(merged_nodups)
 
     output:
-    tuple val(sample), path(inter_30), path("inter_30_hists.m")
+    tuple val(sample), path(inter_30_txt), path("inter_30_hists.m")
 
     script:
     """
-    cp ${inter_30} "${inter_30.simpleName}_local"
+    cp ${inter_30_txt} "${inter_30_txt.simpleName}_local"
 
     statistics.pl \\
         -s ${params.site_file} \\
         -l ${params.ligation} \\
-        -o ${inter_30.simpleName}_local \\
+        -o ${inter_30_txt.simpleName}_local \\
         -q 30 \\
         ${merged_nodups}
 
-    mv "${inter_30.simpleName}_local_hists.m" inter_30_hists.m
-    mv "${inter_30.simpleName}_local" ${inter_30}
+    mv "${inter_30_txt.simpleName}_local_hists.m" inter_30_hists.m
+    mv "${inter_30_txt.simpleName}_local" ${inter_30_txt}
     """
 }
 
@@ -169,14 +169,17 @@ workflow hic {
     hic_stats_input = inter_ch.map { sample, _inter_txt, inter_30_txt, _inter_hists_m, merged_nodups ->
         tuple(sample, inter_30_txt, merged_nodups)
     }
-    // output: tuple val(sample), path(inter_30_hic), path(inter_30_hists)
+    // output: tuple val(sample), path(inter_30_txt), path(inter_30_hists_m)
     hic_stats_out = HIC_STATS(hic_stats_input)
-    // output : tuple val(sample), path(inter_30_hic)
-    pre_q30_input = hic_stats_out.map { sample, inter_30, inter_30_hists ->
-        tuple(sample, inter_30, inter_30_hists)
-    }
-    // output : tuple val(sample), path(inter_30_hic)
-    inter_30_hic_ch = JUICER_TOOLS_PRE_Q30(pre_q30_input)
+
+    pre_q30_ch = hic_stats_out.join(
+        inter_ch.map { sample, _inter_txt, _inter_30_txt, _inter_hists_m, merged_nodups ->
+            tuple(sample, merged_nodups)
+        },
+        by: 0
+    )
+
+    inter_30_hic_ch = JUICER_TOOLS_PRE_Q30(pre_q30_ch)
 
     emit:
     hic_out_ch = inter_30_hic_ch
