@@ -146,7 +146,7 @@ process HIC_STATS {
         -q 30 \\
         ${merged_nodups}
 
-    mv "${inter_30.simpleName}_local.hists.m" inter_30_hists.m
+    mv "${inter_30.simpleName}_local_hists.m" inter_30_hists.m
     mv "${inter_30.simpleName}_local" ${inter_30}
     """
 }
