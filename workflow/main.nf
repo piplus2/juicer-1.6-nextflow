@@ -89,7 +89,6 @@ def validateParameters() {
         params.save_merged_nodups_bam = true
     }
     else if (params.save_merged_nodups_bam instanceof Boolean) {
-        // no-op
     }
     else if (params.save_merged_nodups_bam instanceof Number) {
         params.save_merged_nodups_bam = params.save_merged_nodups_bam as Integer != 0
@@ -137,8 +136,8 @@ workflow NFCORE_JUICER {
         }
         .groupTuple(by: 0)
 
-    merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
     if (params.save_merged_nodups_bam) {
+        merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
         def merged_nodups_by_sample = nodups.join(merged_sam)
         SAM_TO_BAM(REMOVE_DUPLICATES_SAM(merged_nodups_by_sample))
     }
