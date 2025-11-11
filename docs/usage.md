@@ -34,7 +34,7 @@ patient1,patient1_lane2,data/patient1_L002_R1.fastq.gz,data/patient1_L002_R2.fas
 | `--motif_dir` | Directory with motif definitions for the optional motif finding step. |
 | `--nofrag` | Skip fragment delimitation (`1` by default). Set to `0` to enable fragment-based maps. |
 | `--resolutions` | Comma-separated list of map resolutions passed to HiCCUPS and `.hic` generation. |
-| `--save_merged_nodups_bam` | Set to `false` to skip generating the deduplicated `merged_nodups.bam` output. |
+| `--save_merged_nodups_bam` | Set to 'false' to skip generating the deduplicated `merged_nodups.bam` output (default: 'true'). |
 
 ## Profiles
 
