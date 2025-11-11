@@ -158,7 +158,7 @@ workflow NFCORE_JUICER {
         .map { sample, inter, inter_30, inter_hists, _collisions, _abnorm_sam, _unmapped_sam ->
             tuple(sample, inter, inter_30, inter_hists)
         }
-        .join(nodups, failOnMismatch: true)
+        .join(nodups)
 
     hic_out_ch = GEN_HIC_FILES(hic_input)
 
