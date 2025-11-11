@@ -21,12 +21,14 @@ process STATS {
     export LC_ALL=en_US.UTF-8
 
     mkdir -p aligned
+    cp ${inter} aligned/${inter}_local
 
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter}
     cat ${res_txts.join(' ')} | stats_sub.awk >> ${inter}
-    juicer_tools LibraryComplexity aligned ${inter} >> ${inter}
+    juicer_tools LibraryComplexity aligned ${inter} >> aligned/${inter}_local
 
-    cp ${inter} ${inter_30}
+    cp aligned/${inter}_local ${inter_30}
+    cp aligned/${inter}_local ${inter}
 
     stat_cmd="statistics.pl"
     if [[ -n "${params.site_file}" ]]; then
