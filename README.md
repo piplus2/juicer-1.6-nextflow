@@ -54,6 +54,7 @@ All default parameters are defined in `nextflow.config`. Important options inclu
 - `--outdir` – Destination for all published results (default: `./results`).
 - `--threads` – Default CPU allocation for processes carrying the `hpc` label.
 - `--java_mem` – Maximum Java heap size supplied to Juicer tools.
+- `--save_merged_nodups_bam` – Toggle creation of the deduplicated `merged_nodups.bam` file (default: enabled).
 
 Profiles are defined in `nextflow.config`:
 
