@@ -84,6 +84,28 @@ def validateParameters() {
     if (!params.genome_id) {
         exit(1, "Parameter --genome_id is required")
     }
+
+    if (params.save_merged_nodups_bam == null) {
+        params.save_merged_nodups_bam = true
+    }
+    else if (params.save_merged_nodups_bam instanceof Boolean) {
+        // no-op
+    }
+    else if (params.save_merged_nodups_bam instanceof Number) {
+        params.save_merged_nodups_bam = params.save_merged_nodups_bam as Integer != 0
+    }
+    else {
+        def value = params.save_merged_nodups_bam.toString().toLowerCase()
+        if (value in ['true', '1', 'yes', 'y']) {
+            params.save_merged_nodups_bam = true
+        }
+        else if (value in ['false', '0', 'no', 'n']) {
+            params.save_merged_nodups_bam = false
+        }
+        else {
+            exit(1, "Parameter --save_merged_nodups_bam must be true or false")
+        }
+    }
 }
 
 workflow NFCORE_JUICER {
@@ -116,9 +138,10 @@ workflow NFCORE_JUICER {
         .groupTuple(by: 0)
 
     merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
-    merged_nodups_by_sample = nodups.join(merged_sam)
-
-    SAM_TO_BAM(REMOVE_DUPLICATES_SAM(merged_nodups_by_sample))
+    if (params.save_merged_nodups_bam) {
+        def merged_nodups_by_sample = nodups.join(merged_sam)
+        SAM_TO_BAM(REMOVE_DUPLICATES_SAM(merged_nodups_by_sample))
+    }
 
     chimeric_by_sample = chimeric_reads
         .map { sample, _name, _norm_txt, abnorm_sam, unmapped_sam, _norm_sam, norm_res_txt ->
