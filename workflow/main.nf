@@ -72,6 +72,13 @@ def buildFastqChannel() {
 }
 
 def validateParameters() {
+    if (!params.outdir) {
+        params.outdir = "${launchDir}/results"
+    }
+
+    if (!params.output_dir) {
+        params.output_dir = params.outdir
+    }
 
     if (!params.readstr1) {
         params.readstr1 = '_R1'
@@ -95,6 +102,9 @@ def validateParameters() {
     if (!params.genome_id) {
         exit(1, "Parameter --genome_id is required")
     }
+    else {
+        params.genomeID = params.genome_id
+    }
 
     if (params.save_merged_nodups_bam == null) {
         params.save_merged_nodups_bam = true
@@ -115,6 +125,10 @@ def validateParameters() {
         else {
             exit(1, "Parameter --save_merged_nodups_bam must be true or false")
         }
+    }
+
+    if (!params.site) {
+        params.site = 'none'
     }
 
     params.site = params.site.toString().toLowerCase()
