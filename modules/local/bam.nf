@@ -48,7 +48,7 @@ process MERGE_SORT_SAM {
     def sam_files = sam_list instanceof List ? sam_list : [sam_list]
     def sam_inputs = sam_files.collect { it.toString() }.join(' ')
     """
-    samtools merge -@ ${task.cpus} -n merged.sam ${sam_inputs}
-    samtools sort -@ ${task.cpus} -n -o merged.sorted.sam merged.sam
+    samtools merge -@ ${task.cpus} -n merged.sam ${sam_inputs} | \\
+        samtools sort -@ ${task.cpus} -n -o merged.sorted.sam -
     """
 }

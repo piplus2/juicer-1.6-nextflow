@@ -215,13 +215,13 @@ workflow NFCORE_JUICER {
         tuple(sample, merged_nodups_txt)
     }
 
-    norm_sam_by_sample = chimeric_reads
-        .map { sample, _name, _norm_txt, _abnorm_sam, _unmapped_sam, norm_sam, _norm_res_txt ->
-            tuple(sample, norm_sam)
-        }
-        .groupTuple(by: 0)
-
     if (params.save_merged_nodups_bam) {
+        norm_sam_by_sample = chimeric_reads
+            .map { sample, _name, _norm_txt, _abnorm_sam, _unmapped_sam, norm_sam, _norm_res_txt ->
+                tuple(sample, norm_sam)
+            }
+            .groupTuple(by: 0)
+
         merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
         def merged_nodups_by_sample = nodups.join(merged_sam)
         SAM_TO_BAM(REMOVE_DUPLICATES_SAM(merged_nodups_by_sample))
