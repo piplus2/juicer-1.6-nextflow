@@ -2,12 +2,12 @@ nextflow.enable.dsl = 2
 
 include { process_fragments     } from '../subworkflows/local/align.nf'
 include { postprocessing        } from '../subworkflows/local/postprocessing.nf'
-include { REMOVE_DUPLICATES_SAM ; SAM_TO_BAM } from '../modules/local/bam.nf'
+include { REMOVE_DUPLICATES_SAM ; SAM_TO_BAM } from '../modules/local/bam'
 include { GEN_HIC_FILES         } from '../modules/local/hic.nf'
 include { STATS                 } from '../modules/local/stats.nf'
 include { MAKE_HEADERFILE       } from '../modules/local/header.nf'
 include { MERGE_SORT ; REMOVE_DUPLICATES } from '../modules/local/fragments.nf'
-include { MERGE_SORT_SAM        } from '../modules/local/bam.nf'
+include { MERGE_SORT_SAM        } from '../modules/local/bam'
 
 def buildFastqChannel() {
     if (!params.input) {

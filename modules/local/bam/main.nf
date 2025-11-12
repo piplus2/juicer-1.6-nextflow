@@ -1,6 +1,6 @@
 process REMOVE_DUPLICATES_SAM {
     tag { sample }
-    label "hpc"
+    label "mediumcpu"
 
     input:
     tuple val(sample), path(merged_nodups), path(merged_sorted_sam)
@@ -16,8 +16,9 @@ process REMOVE_DUPLICATES_SAM {
 
 process SAM_TO_BAM {
     tag { sample }
-    label "hpc"
-    label "samtools"
+    label "highcpu"
+
+    conda "${moduleDir}/environment.yml"
 
     publishDir "${params.outdir}/${sample}/aligned", pattern: "*.bam", mode: 'copy'
 
@@ -35,8 +36,9 @@ process SAM_TO_BAM {
 
 process MERGE_SORT_SAM {
     tag { sample }
-    label "hpc"
-    label "samtools"
+    label "highcpu"
+
+    conda "${moduleDir}/environment.yml"
 
     input:
     tuple val(sample), path(sam_list)
