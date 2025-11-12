@@ -5,7 +5,7 @@ process STATS {
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
-    tuple val(sample), path(header), path(res_txts), path(abnorm_sams), path(unmapped_sams), path(merged_nodups)
+    tuple val(sample), path(header), path(res_txts), path(abnorm_sams), path(unmapped_sams), path(merged_nodups), path(dups_txt), path(opt_dups_txt)
 
     output:
     tuple val(sample), path("inter.txt"), path("inter_30.txt"), path("inter_hists.m"), path("collisions.txt"), path("abnormal.sam"), path("unmapped.sam")
@@ -20,15 +20,11 @@ process STATS {
     export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
 
-    mkdir -p aligned
-    cp ${inter} aligned/${inter}_local
-
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter}
     cat ${res_txts.join(' ')} | stats_sub.awk >> ${inter}
-    juicer_tools LibraryComplexity aligned ${inter} >> aligned/${inter}_local
+    juicer_tools LibraryComplexity "./" ${inter} >> ${inter}
 
-    cp aligned/${inter}_local ${inter_30}
-    cp aligned/${inter}_local ${inter}
+    cp ${inter} ${inter_30}
 
     stat_cmd="statistics.pl"
     if [[ -n "${params.site_file}" ]]; then

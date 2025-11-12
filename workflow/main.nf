@@ -235,7 +235,7 @@ workflow NFCORE_JUICER {
 
     stats_input = out_header
         .join(chimeric_by_sample)
-        .join(nodups)
+        .join(merged_nodups)
 
     stats_output = STATS(stats_input)
 
