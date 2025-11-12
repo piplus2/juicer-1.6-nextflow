@@ -70,6 +70,15 @@ def buildFastqChannel() {
 }
 
 def validateParameters() {
+
+    if (!params.readstr1) {
+        params.readstr1 = '_R1'
+    }
+
+    if (!params.readstr2) {
+        params.readstr2 = '_R2'
+    }
+
     if (!params.reference) {
         exit(1, "Parameter --reference is required")
     }
@@ -104,6 +113,79 @@ def validateParameters() {
         else {
             exit(1, "Parameter --save_merged_nodups_bam must be true or false")
         }
+    }
+
+    params.site = params.site.toString().toLowerCase()
+
+    if (params.site == 'hindiii') {
+        params.ligation = "AAGCTAGCTT"
+    }
+    else if (params.site == "dpnii") {
+        params.ligation = "GATCGATC"
+    }
+    else if (params.site == 'mboi') {
+        params.ligation = "GATCGATC"
+    }
+    else if (params.site == 'ncoi') {
+        params.ligation = "CCATGCATGG"
+    }
+    else if (params.site == "arima") {
+        params.ligation = "'(GAATAATC|GAATACTC|GAATAGTC|GAATATTC|GAATGATC|GACTAATC|GACTACTC|GACTAGTC|GACTATTC|GACTGATC|GAGTAATC|GAGTACTC|GAGTAGTC|GAGTATTC|GAGTGATC|GATCAATC|GATCACTC|GATCAGTC|GATCATTC|GATCGATC|GATTAATC|GATTACTC|GATTAGTC|GATTATTC|GATTGATC)'"
+    }
+    else if (params.site == "none") {
+        params.ligation = "XXXX"
+    }
+    else {
+        exit(1, "Parameter --site must be one of: hindiii, mboi, dpnii, ncoi, arima, none")
+    }
+
+    if (!params.site_file) {
+        exit(1, "Parameter --site_file is required")
+    }
+    else {
+        if (!file(params.site_file).exists()) {
+            exit(1, "Restriction site file not found: ${params.site_file}")
+        }
+    }
+
+    if (!params.resolutions) {
+        params.resolutions = '2500000,1000000,500000,250000,100000,50000,25000,10000,5000,2000,1000,500,200,100'
+    }
+
+    if (!params.nofrag) {
+        params.nofrag = true
+    }
+    else {
+        def value = params.nofrag.toString().toLowerCase()
+        if (value in ['true', '1', 'yes', 'y']) {
+            params.nofrag = true
+        }
+        else if (value in ['false', '0', 'no', 'n']) {
+            params.nofrag = false
+        }
+        else {
+            exit(1, "Parameter --nofrag must be true or false")
+        }
+    }
+
+    if (!params.justexact) {
+        params.justexact = false
+    }
+    else {
+        def value = params.justexact.toString().toLowerCase()
+        if (value in ['true', '1', 'yes', 'y']) {
+            params.justexact = true
+        }
+        else if (value in ['false', '0', 'no', 'n']) {
+            params.justexact = false
+        }
+        else {
+            exit(1, "Parameter --justexact must be true or false")
+        }
+    }
+
+    if (!params.ext) {
+        params.ext = '.fastq.gz'
     }
 }
 
