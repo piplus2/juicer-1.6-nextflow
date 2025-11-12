@@ -1,13 +1,15 @@
 nextflow.enable.dsl = 2
 
-include { process_fragments     } from '../subworkflows/local/align.nf'
-include { postprocessing        } from '../subworkflows/local/postprocessing.nf'
-include { REMOVE_DUPLICATES_SAM ; SAM_TO_BAM } from '../modules/local/bam'
-include { GEN_HIC_FILES         } from '../modules/local/hic.nf'
-include { STATS                 } from '../modules/local/stats.nf'
-include { MAKE_HEADERFILE       } from '../modules/local/header.nf'
-include { MERGE_SORT ; REMOVE_DUPLICATES } from '../modules/local/fragments.nf'
-include { MERGE_SORT_SAM        } from '../modules/local/bam'
+include { process_fragments     } from '../subworkflows/local/align_reads'
+include { postprocessing        } from '../subworkflows/local/postprocessing'
+include { REMOVE_DUPLICATES_SAM } from '../modules/local/bam/remove_dups_sam'
+include { SAM_TO_BAM            } from '../modules/local/bam/convert_to_bam'
+include { hic                   } from '../subworkflows/local/gen_hic'
+include { STATS                 } from '../modules/local/stats'
+include { MAKE_HEADERFILE       } from '../modules/local/header'
+include { MERGE_SORT            } from '../modules/local/merge_sort'
+include { REMOVE_DUPLICATES     } from '../modules/local/remove_dups'
+include { MERGE_SORT_SAM        } from '../modules/local/bam/merge_and_sort'
 
 def buildFastqChannel() {
     if (!params.input) {
@@ -245,7 +247,7 @@ workflow NFCORE_JUICER {
         }
         .join(nodups)
 
-    hic_out_ch = GEN_HIC_FILES(hic_input)
+    hic_out_ch = hic(hic_input)
 
     inter_30_hic = hic_out_ch.map { sample, _inter_hic, inter_30_hic_file, _inter_30_hists ->
         tuple(sample, inter_30_hic_file)
