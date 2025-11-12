@@ -1,6 +1,6 @@
 process MERGE_SORT {
     tag "${sample}"
-    label "hpc"
+    label "mediumcpu"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
@@ -26,7 +26,7 @@ process MERGE_SORT {
 
 process REMOVE_DUPLICATES {
     tag "${sample}"
-    label "hpc"
+    label "mediumcpu"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 

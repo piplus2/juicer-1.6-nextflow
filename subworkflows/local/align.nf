@@ -1,6 +1,6 @@
 process COUNT_LIGATIONS {
     tag "${sample}-${name}"
-    label "hpc"
+    label "smallcpu"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
@@ -46,9 +46,8 @@ process COUNT_LIGATIONS {
 
 process BWA_ALIGN {
     tag "${sample}-${name}"
-    label "hpc"
-
-    container "docker://pinglese6022/bwa-mem2:2.3"
+    label "highcpu"
+    label "bwa"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
@@ -69,7 +68,7 @@ process BWA_ALIGN {
 
 process FRAGMENT {
     tag "${sample}-${name}"
-    label "hpc"
+    label "smallcpu"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
@@ -99,7 +98,7 @@ process FRAGMENT {
 
 process SORT {
     tag "${sample}-${name}"
-    label "hpc"
+    label "mediumcpu"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
@@ -124,7 +123,7 @@ process SORT {
 
 process CHIMERIC {
     tag "${sample}-${name}"
-    label "hpc"
+    label "mediumcpu"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 

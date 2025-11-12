@@ -1,6 +1,6 @@
 process MAKE_HEADERFILE {
     tag "${sample}"
-    label "hpc"
+    label "smallcpu"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 

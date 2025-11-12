@@ -1,7 +1,7 @@
 // Process: Generate .hic files (normal and inter_30.hic)
 process GEN_HIC_FILES {
     tag "${sample}"
-    label "hpc"
+    label "highcpu"
     cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
@@ -56,7 +56,7 @@ process GEN_HIC_FILES {
 
 process JUICER_TOOLS_PRE_Q1 {
     tag "${sample}"
-    label 'hpc'
+    label 'highcpu'
     cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
@@ -90,7 +90,7 @@ process JUICER_TOOLS_PRE_Q1 {
 
 process JUICER_TOOLS_PRE_Q30 {
     tag "${sample}"
-    label 'hpc'
+    label 'highcpu'
     cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
@@ -124,7 +124,7 @@ process JUICER_TOOLS_PRE_Q30 {
 
 process HIC_STATS {
     tag "${sample}"
-    label 'hpc'
+    label 'mediumcpu'
     cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'

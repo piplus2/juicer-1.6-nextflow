@@ -1,5 +1,4 @@
 .nextflow.log*
 work/
 .nextflow
-nextflow.config
 *.log

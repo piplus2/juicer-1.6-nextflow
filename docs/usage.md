@@ -39,15 +39,16 @@ patient1,patient1_lane2,data/patient1_L002_R1.fastq.gz,data/patient1_L002_R2.fas
 ## Profiles
 
 - `standard`: Local execution suitable for development and small runs.
-- `hpc`: PBS Pro profile that mirrors the IIT deployment. Adjust queue names, scratch behaviour, and `clusterOptions` as needed.
+- `hpc`: PBS Pro template; swap queue names or executor directives to match your scheduler (e.g. SLURM).
 - `test`: Convenience profile pointing to `assets/test_samplesheet.csv`. Replace placeholder paths before running.
+- `conda`: Enables Nextflow's conda support and disables containers (combine via `-profile standard,conda`).
+- `singularity`: Enables Singularity while disabling Docker (combine via `-profile standard,singularity`).
 
 ## Resource tuning
 
 Resource requests are derived from the matrix in `conf/process_resources.config`. Customize them without editing the file by passing CLI flags:
 
-- `--default_cpus`, `--default_memory_gb`, `--default_time`: Baseline for all CPU-only processes.
-- `--default_gpu_cpus`, `--default_gpu_memory_gb`, `--default_gpu_time`, `--gpu_cluster_options`: Baseline for GPU-labelled stages.
+- `--smallcpu_*`, `--mediumcpu_*`, `--highcpu_*`, `--gpu_*`: Override CPUs / memory / time for each resource label (e.g. `--mediumcpu_memory_gb 48`).
 - Per-process overrides follow the convention `--<process>_cpus`, `--<process>_memory_gb`, `--<process>_time` (e.g. `--merge_sort_sam_cpus 12`, `--gen_hic_files_memory_gb 56`).
 - Alignment-specific helpers: `--align_cpus`, `--align_memory_gb`, `--align_time`.
 

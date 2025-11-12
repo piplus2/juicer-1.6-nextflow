@@ -6,7 +6,7 @@ An nf-core style port of the Juicer 1.6 Hi-C processing workflow. The pipeline o
 
 - **nf-core layout** – Standardised project structure with `main.nf`, `workflow/`, and modular DSL2 components for easier maintenance and customisation.
 - **Samplesheet driven inputs** – Supply paired-end FASTQ files through a CSV samplesheet for reproducible and batch-friendly submissions.
-- **Configurable profiles** – `standard` (local) and `hpc` (PBS Pro) profiles with consistent process labels and containers, plus an extendable `test` profile stub.
+- **Configurable profiles** – `standard`, `hpc`, and `test` workflow profiles plus optional `conda` / `singularity` runtime toggles that can be combined as needed.
 - **GPU-aware post-processing** – HiCCUPS, Arrowhead, and motif discovery steps honour GPU resource labels while falling back gracefully if CUDA is unavailable.
 
 ## Quick start
@@ -52,19 +52,20 @@ All default parameters are defined in `nextflow.config`. Important options inclu
 - `--site` / `--site_file` – Restriction enzyme label or explicit restriction site file. The pipeline resolves known motifs automatically when possible.
 - `--motif_dir` – Directory containing motif files for loop annotation (optional).
 - `--outdir` – Destination for all published results (default: `./results`).
-- `--threads` – Default CPU allocation for processes carrying the `hpc` label.
+- `--threads` – Base CPU count used when deriving the `highcpu` resource label (defaults to 16 if unset).
 - `--java_mem` – Maximum Java heap size supplied to Juicer tools.
 - `--align_cpus` / `--align_memory_gb` / `--align_time` – Fine-tune resources for `BWA_ALIGN` (defaults: `min(--threads,16)` CPUs, `64 GB`, `48h`).
-- `--default_cpus` / `--default_memory_gb` / `--default_time` – Baseline resources for non-GPU processes without explicit overrides (defaults: `4`, `16 GB`, `48h`).
-- `--default_gpu_cpus` / `--default_gpu_memory_gb` / `--default_gpu_time` / `--gpu_cluster_options` – Baseline resources for GPU-labelled stages (defaults: `8`, `64 GB`, `48h`, and PBS `-l select=1:ncpus=24:ngpus=1`).
-- Per-process overrides follow the pattern `--<process>_cpus`, `--<process>_memory_gb`, and `--<process>_time` (e.g. `--stats_memory_gb 48` or `--sam_to_bam_cpus 12`). See `conf/process_resources.config` for the full list of keys.
+- `--smallcpu_*`, `--mediumcpu_*`, `--highcpu_*`, `--gpu_*` – Override the CPU / memory / time defaults for each resource label (see `conf/process_resources.config` for the exact parameters).
+- Per-process overrides follow the pattern `--<process>_cpus`, `--<process>_memory_gb`, and `--<process>_time` (e.g. `--stats_memory_gb 48` or `--sam_to_bam_cpus 12`).
 - `--save_merged_nodups_bam` – Toggle creation of the deduplicated `merged_nodups.bam` file (default: enabled).
 
 Profiles are defined in `nextflow.config`:
 
-- `standard` – Local execution with default resource requests.
-- `hpc` – PBS Pro executor configuration mirroring the original cluster deployment.
+- `standard` – Local execution with default resource labels.
+- `hpc` – PBS Pro executor template; adjust queue names, scratch behaviour, or swap in SLURM directives as needed.
 - `test` – Stub profile pointing to `assets/test_samplesheet.csv`; replace the example paths with real small test data before running.
+- `conda` – Enables Nextflow’s conda integration and disables containers (combine via `-profile standard,conda`).
+- `singularity` – Enables Singularity support while disabling Docker (combine via `-profile standard,singularity`).
 
 ## Pipeline overview
 
@@ -99,11 +100,11 @@ Outputs are organised by sample inside `--outdir`, mirroring the legacy Juicer f
 | `GEN_HIC_FILES` | 6 | 48 GB | Two passes of `juicer_tools pre` and `statistics.pl`. |
 | `JUICER_TOOLS_PRE_Q1/Q30` | 4 | 32 GB | Standalone `.hic` creation. |
 | `HIC_STATS` | 4 | 24 GB | Generates `inter_30_hists.m`. |
-| `ARROWHEAD` | `--default_gpu_cpus` (default 8) | `--default_gpu_memory_gb` (default 64 GB) | GPU-friendly domain calling. |
-| `HICCUPS` | `max(8, --default_gpu_cpus)` | 96 GB (override via `--hiccups_memory_gb`) | GPU loop calling. |
-| `MOTIF_FINDER` | `--default_gpu_cpus` (default 8) | 64 GB (override via `--motif_finder_memory_gb`) | `juicer_tools apa` + motif search. |
+| `ARROWHEAD` | `gpu` label | `gpu` label | GPU-friendly domain calling. |
+| `HICCUPS` | `gpu` label (≥8 CPUs) | 96 GB (override via `--hiccups_memory_gb`) | GPU loop calling. |
+| `MOTIF_FINDER` | `gpu` label | 64 GB (override via `--motif_finder_memory_gb`) | `juicer_tools apa` + motif search. |
 
-Any process not explicitly listed falls back to `--default_cpus` / `--default_memory_gb` / `--default_time`. Override individual entries directly from the CLI, for example:
+For custom modules, simply add the appropriate label (`smallcpu`, `mediumcpu`, `highcpu`, or `gpu`) to opt into these defaults. You can still override individual entries directly from the CLI, for example:
 
 ```bash
 nextflow run . \

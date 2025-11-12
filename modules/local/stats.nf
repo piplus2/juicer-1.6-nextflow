@@ -1,6 +1,6 @@
 process STATS {
     tag "${sample}"
-    label "hpc"
+    label "mediumcpu"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
