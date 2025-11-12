@@ -1,7 +1,6 @@
 process HIC_STATS {
     tag "${sample}"
     label 'mediumcpu'
-    cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
 

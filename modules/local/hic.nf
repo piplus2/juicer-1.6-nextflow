@@ -2,7 +2,6 @@
 process GEN_HIC_FILES {
     tag "${sample}"
     label "highcpu"
-    cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
 
@@ -52,11 +51,3 @@ process GEN_HIC_FILES {
         ${genome}
     """
 }
-
-
-
-
-
-
-
-

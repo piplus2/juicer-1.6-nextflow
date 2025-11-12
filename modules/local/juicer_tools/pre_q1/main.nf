@@ -1,7 +1,6 @@
 process JUICER_TOOLS_PRE_Q1 {
     tag "${sample}"
     label 'highcpu'
-    cache 'deep'
 
     publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
 
