@@ -151,6 +151,9 @@ def validateParameters() {
     if (!params.resolutions) {
         params.resolutions = '2500000,1000000,500000,250000,100000,50000,25000,10000,5000,2000,1000,500,200,100'
     }
+    else if (!params.resolutions.matches(/^(\d+,)*\d+$/)) {
+        exit(1, "Parameter --resolutions must be a comma-separated list of integers")
+    }
 
     if (!params.nofrag) {
         params.nofrag = true
