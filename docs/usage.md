@@ -42,6 +42,25 @@ patient1,patient1_lane2,data/patient1_L002_R1.fastq.gz,data/patient1_L002_R2.fas
 - `hpc`: PBS Pro profile that mirrors the IIT deployment. Adjust queue names, scratch behaviour, and `clusterOptions` as needed.
 - `test`: Convenience profile pointing to `assets/test_samplesheet.csv`. Replace placeholder paths before running.
 
+## Resource tuning
+
+Resource requests are derived from the matrix in `conf/process_resources.config`. Customize them without editing the file by passing CLI flags:
+
+- `--default_cpus`, `--default_memory_gb`, `--default_time`: Baseline for all CPU-only processes.
+- `--default_gpu_cpus`, `--default_gpu_memory_gb`, `--default_gpu_time`, `--gpu_cluster_options`: Baseline for GPU-labelled stages.
+- Per-process overrides follow the convention `--<process>_cpus`, `--<process>_memory_gb`, `--<process>_time` (e.g. `--merge_sort_sam_cpus 12`, `--gen_hic_files_memory_gb 56`).
+- Alignment-specific helpers: `--align_cpus`, `--align_memory_gb`, `--align_time`.
+
+Example CLI overrides:
+
+```bash
+nextflow run . \
+  --align_cpus 24 \
+  --align_memory_gb 96 \
+  --stats_memory_gb 48 \
+  --hiccups_memory_gb 128
+```
+
 ## Containers and dependencies
 
 The pipeline assumes Juicer helper scripts and binaries are available in `bin/` (added to the `PATH` via `conf/base.config`). Containers are only configured for `samtools`; feel free to extend the configuration with Singularity/Docker images for the remaining tools.
