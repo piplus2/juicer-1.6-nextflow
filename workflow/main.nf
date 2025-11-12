@@ -240,8 +240,8 @@ workflow NFCORE_JUICER {
     stats_output = STATS(stats_input)
 
     hic_input = stats_output
-        .map { sample, inter, inter_30, inter_hists, _collisions, _abnorm_sam, _unmapped_sam ->
-            tuple(sample, inter, inter_30, inter_hists)
+        .map { sample, inter_txt, inter_30_txt, inter_hists_m, _collisions, _abnorm_sam, _unmapped_sam ->
+            tuple(sample, inter_txt, inter_30_txt, inter_hists_m)
         }
         .join(nodups)
 
