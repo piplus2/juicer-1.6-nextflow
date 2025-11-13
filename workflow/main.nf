@@ -1,7 +1,7 @@
 nextflow.enable.dsl = 2
 
 include { process_fragments     } from '../subworkflows/local/align_reads'
-include { postprocessing        } from '../subworkflows/local/postprocessing'
+include { postprocessing        } from '../subworkflows/local/postproc'
 include { REMOVE_DUPLICATES_SAM } from '../modules/local/bam/remove_dups_sam'
 include { SAM_TO_BAM            } from '../modules/local/bam/convert_to_bam'
 include { hic                   } from '../subworkflows/local/gen_hic'
