@@ -1,6 +1,6 @@
 process COUNT_LIGATIONS {
     tag "${sample}-${name}"
-    label "mediumcpu"
+    label "highmemory"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
@@ -8,11 +8,11 @@ process COUNT_LIGATIONS {
     tuple val(sample), val(name), path(read1), path(read2)
 
     output:
-    tuple val(sample), val(name), path("${name}${params.ext}_initial_norm.txt.res.txt"), path("${name}${params.ext}_linecount.txt")
+    tuple val(sample), val(name), path(output_norm_txt), path(output_linecount_txt)
 
     script:
-    def output_norm_txt = "${name}${params.ext}_initial_norm.txt.res.txt"
-    def output_linecount_txt = "${name}${params.ext}_linecount.txt"
+    output_norm_txt = "${name}${params.ext}_initial_norm.txt.res.txt"
+    output_linecount_txt = "${name}${params.ext}_linecount.txt"
     """
     export LC_ALL=C
     export LC_COLLATE=C
