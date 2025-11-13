@@ -207,6 +207,25 @@ def validateParameters() {
     }
 }
 
+
+def displayInfo() {
+    println("================ Juicer Pipeline ================")
+    println("Reference genome:       ${params.reference}")
+    println("Genome ID:              ${params.genome_id}")
+    println("Restriction site:       ${params.site} (${params.ligation})")
+    println("Restriction site file:  ${params.site_file}")
+    println("Output directory:       ${params.outdir}")
+    println("Save merged no-dup BAM: ${params.save_merged_nodups_bam}")
+    println("Read 1 suffix:         '${params.readstr1}'")
+    println("Read 2 suffix:         '${params.readstr2}'")
+    println("FASTQ extension:        '${params.ext}'")
+    println("No fragment filtering:  ${params.nofrag}")
+    println("Just exact matches:     ${params.justexact}")
+    println("Resolutions:            ${params.resolutions}")
+    println("================================================")
+}
+
+
 workflow NFCORE_JUICER {
     main:
     validateParameters()
