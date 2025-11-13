@@ -8,11 +8,11 @@ process MERGE_SORT {
     tuple val(sample), path(sort_files)
 
     output:
-    tuple val(sample), path("${sample}${params.ext}_merged_sort.txt")
+    tuple val(sample), path(output_merged_sort_txt)
 
     script:
     def tmpdir = "HIC_tmp"
-    def output_merged_sort_txt = "${sample}${params.ext}_merged_sort.txt"
+    output_merged_sort_txt = "${sample}${params.ext}_merged_sort.txt"
     """
     mkdir -p ${tmpdir}
 

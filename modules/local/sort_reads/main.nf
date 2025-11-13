@@ -8,11 +8,11 @@ process SORT {
     tuple val(sample), val(name), path(frag_txt)
 
     output:
-    tuple val(sample), path("${name}${params.ext}_sort.txt")
+    tuple val(sample), path(output_sort_txt)
 
     script:
     def tmpdir = "HIC_tmp"
-    def output_sort_txt = "${name}${params.ext}_sort.txt"
+    output_sort_txt = "${name}${params.ext}_sort.txt"
     """
     mkdir -p ${tmpdir}
 

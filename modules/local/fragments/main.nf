@@ -8,10 +8,10 @@ process CONVERT_FRAGMENTS {
     tuple val(sample), val(name), path(norm_txt)
 
     output:
-    tuple val(sample), val(name), path("${name}${params.ext}.frag.txt")
+    tuple val(sample), val(name), path(output_frag_txt)
 
     script:
-    def output_frag_txt = "${name}${params.ext}.frag.txt"
+    output_frag_txt = "${name}${params.ext}.frag.txt"
     """
     if [ "${params.site}" != "none" ] && [ -e "${params.site_file}" ]; then
         fragment.pl \\

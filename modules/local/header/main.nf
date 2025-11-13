@@ -8,18 +8,18 @@ process MAKE_HEADERFILE {
     val sample
 
     output:
-    tuple val(sample), path("header")
+    tuple val(sample), path(header_file)
 
     script:
-    def header = "header"
+    header_file = "header"
     """
-    date > ${header}
-    echo -ne 'Experiment description: ${params.about};' >> ${header}
-    echo -ne "Juicer version: ${params.juicer_version};" >> ${header}
-    bwa 2>&1 | awk '\$1=="Version:"{printf(" BWA %s; ", \$2)}' >> ${header}
-    echo -ne "${params.threads} threads; " >> ${header}
-    java -version 2>&1 | awk 'NR==1{printf("%s; ", \$0);}' >> ${header}
-    juicer_tools -V 2>&1 | awk '\$1=="Juicer" && \$2=="Tools"{printf("%s; ", \$0);}' >> ${header}
-    echo "" >> ${header}
+    date > ${header_file}
+    echo -ne 'Experiment description: ${params.about};' >> ${header_file}
+    echo -ne "Juicer version: ${params.juicer_version};" >> ${header_file}
+    bwa 2>&1 | awk '\$1=="Version:"{printf(" BWA %s; ", \$2)}' >> ${header_file}
+    echo -ne "${params.threads} threads; " >> ${header_file}
+    java -version 2>&1 | awk 'NR==1{printf("%s; ", \$0);}' >> ${header_file}
+    juicer_tools -V 2>&1 | awk '\$1=="Juicer" && \$2=="Tools"{printf("%s; ", \$0);}' >> ${header_file}
+    echo "" >> ${header_file}
     """
 }

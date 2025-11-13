@@ -8,13 +8,13 @@ process REMOVE_DUPLICATES {
     tuple val(sample), path(merged_sort)
 
     output:
-    tuple val(sample), path("merged_nodups.txt"), path("dups.txt"), path("opt_dups.txt")
+    tuple val(sample), path(merged_nodups), path(dups), path(opt_dups)
 
     script:
-    def merged_nodups = "merged_nodups.txt"
-    def dups = "dups.txt"
+    merged_nodups = "merged_nodups.txt"
+    dups = "dups.txt"
+    opt_dups = "opt_dups.txt"
     def optdups = "optdups.txt"
-    def opt_dups = "opt_dups.txt"
     """
     mkdir -p aligned
 
