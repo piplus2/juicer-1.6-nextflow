@@ -1,6 +1,6 @@
 process COUNT_LIGATIONS {
     tag "${sample}-${name}"
-    label "smallcpu"
+    label "mediumcpu"
 
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
