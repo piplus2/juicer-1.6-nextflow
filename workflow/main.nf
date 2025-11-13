@@ -127,35 +127,16 @@ def validateParameters() {
     }
 
     if (!params.site) {
-        params.site = 'none'
+        exit(1, "Parameter --site must be specified")
     }
 
-    params.site = params.site.toString().toLowerCase()
-
-    if (params.site == 'hindiii') {
-        params.ligation = "AAGCTAGCTT"
-    }
-    else if (params.site == "dpnii") {
-        params.ligation = "GATCGATC"
-    }
-    else if (params.site == 'mboi') {
-        params.ligation = "GATCGATC"
-    }
-    else if (params.site == 'ncoi') {
-        params.ligation = "CCATGCATGG"
-    }
-    else if (params.site == 'arima') {
-        params.ligation = "'(GAATAATC|GAATACTC|GAATAGTC|GAATATTC|GAATGATC|GACTAATC|GACTACTC|GACTAGTC|GACTATTC|GACTGATC|GAGTAATC|GAGTACTC|GAGTAGTC|GAGTATTC|GAGTGATC|GATCAATC|GATCACTC|GATCAGTC|GATCATTC|GATCGATC|GATTAATC|GATTACTC|GATTAGTC|GATTATTC|GATTGATC)'"
-    }
-    else if (params.site == 'none') {
-        params.ligation = "XXXX"
-    }
-    else {
-        exit(1, "Parameter --site must be one of: hindiii, mboi, dpnii, ncoi, arima, none")
+    def validSites = ['hindiii', 'mboi', 'dpnii', 'ncoi', 'arima', 'none']
+    if (!(params.site in validSites)) {
+        exit(1, "Parameter --site must be one of: ${validSites.join(', ')}")
     }
 
     if (!params.ligation) {
-        exit(1, "Parameter --ligation is required")
+        exit(1, "Parameter --ligation is required (normally derived automatically from --site)")
     }
 
     if (!params.site_file) {
@@ -167,10 +148,7 @@ def validateParameters() {
         }
     }
 
-    if (!params.resolutions) {
-        params.resolutions = '2500000,1000000,500000,250000,100000,50000,25000,10000,5000,2000,1000,500,200,100'
-    }
-    else if (!params.resolutions.matches(/^(\d+,)*\d+$/)) {
+    if (!params.resolutions.matches(/^(\d+,)*\d+$/)) {
         exit(1, "Parameter --resolutions must be a comma-separated list of integers")
     }
 
