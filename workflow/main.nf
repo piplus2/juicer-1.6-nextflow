@@ -144,14 +144,18 @@ def validateParameters() {
     else if (params.site == 'ncoi') {
         params.ligation = "CCATGCATGG"
     }
-    else if (params.site == "arima") {
+    else if (params.site == 'arima') {
         params.ligation = "'(GAATAATC|GAATACTC|GAATAGTC|GAATATTC|GAATGATC|GACTAATC|GACTACTC|GACTAGTC|GACTATTC|GACTGATC|GAGTAATC|GAGTACTC|GAGTAGTC|GAGTATTC|GAGTGATC|GATCAATC|GATCACTC|GATCAGTC|GATCATTC|GATCGATC|GATTAATC|GATTACTC|GATTAGTC|GATTATTC|GATTGATC)'"
     }
-    else if (params.site == "none") {
+    else if (params.site == 'none') {
         params.ligation = "XXXX"
     }
     else {
         exit(1, "Parameter --site must be one of: hindiii, mboi, dpnii, ncoi, arima, none")
+    }
+
+    if (!params.ligation) {
+        exit(1, "Parameter --ligation is required")
     }
 
     if (!params.site_file) {
