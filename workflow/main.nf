@@ -68,7 +68,6 @@ def buildFastqChannel() {
 
             tuple(sample, name, fq1Path, fq2Path)
         }
-        .share()
 }
 
 def validateParameters() {
