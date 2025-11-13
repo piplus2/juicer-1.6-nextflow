@@ -8,10 +8,11 @@ process STATS {
     tuple val(sample), path(header), path(res_txts), path(abnorm_sams), path(unmapped_sams), path(merged_nodups), path(dups_txt), path(opt_dups_txt)
 
     output:
-    tuple val(sample), path(inter_txt), path(inter_30_txt), path("inter_hists.m"), path(collisions_txt), path(abnormal_sam), path(unmapped_sam)
+    tuple val(sample), path(inter_txt), path(inter_30_txt), path(inter_hists_m), path(collisions_txt), path(abnormal_sam), path(unmapped_sam)
 
     script:
     inter_txt = "inter.txt"
+    inter_hists_m = "${inter_txt.simpleName}_hists.m"
     inter_30_txt = "inter_30.txt"
     collisions_txt = "collisions.txt"
     abnormal_sam = "abnormal.sam"
