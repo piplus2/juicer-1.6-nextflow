@@ -15,9 +15,16 @@ process MERGE_SORT_SAM {
 
     script:
     def sam_files = sam_list instanceof List ? sam_list : [sam_list]
-    def sam_inputs = sam_files.collect { it.toString() }.join(' ')
-    """
-    samtools merge -@ ${task.cpus} -n merged.sam ${sam_inputs} | \\
-        samtools sort -@ ${task.cpus} -n -o merged.sorted.sam -
-    """
+    def sam_inputs = sam_files.collect { it.toString() }
+    if (sam_files.size() == 1) {
+        """
+        samtools sort -@ ${task.cpus} -n -o merged.sorted.sam ${sam_inputs[0]}
+        """
+    } else {
+        def sam_inputs_str = sam_inputs.join(' ')
+        """
+        samtools merge -@ ${task.cpus} -n merged.sam ${sam_inputs_str} | \\
+            samtools sort -@ ${task.cpus} -n -o merged.sorted.sam -
+        """
+    }
 }
