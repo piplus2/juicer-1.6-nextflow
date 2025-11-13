@@ -3,6 +3,11 @@ process BWA_ALIGN {
     label "highcpu"
     label "bwa"
 
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/bwa-mem2%3A2.3--he70b90d_0'
+        : 'pinglese6022/bwa-mem2:2.3'}"
+    
+
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
