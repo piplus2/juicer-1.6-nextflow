@@ -229,6 +229,7 @@ def displayInfo() {
 workflow NFCORE_JUICER {
     main:
     validateParameters()
+    displayInfo()
     fastq_pairs = buildFastqChannel()
 
     out_header = MAKE_HEADERFILE(
