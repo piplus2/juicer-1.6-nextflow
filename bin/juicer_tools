@@ -21,4 +21,4 @@
 # THE SOFTWARE.
 #
 # Juicer version 1.5
-java -Djava.library.path=$(dirname $0)/lib64 -Djava.awt.headless=true -Ddevelopment=false -Xmx120g -Xms120g -jar $(dirname $0)/juicer_tools.jar $*
+java -Djava.library.path=$(dirname $0)/lib64 -Djava.awt.headless=true -Ddevelopment=false -jar $(dirname $0)/juicer_tools.jar $*
