@@ -3,6 +3,8 @@ process MOTIF_FINDER {
     tag "${sample}"
     label "gpu"
 
+    container 'docker://pinglese6022/juicer_tools:1.22.01'
+
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
@@ -16,13 +18,12 @@ process MOTIF_FINDER {
     def motif_dir = params.motif_dir == null || params.motif_dir.toString() == "" ? "" : "${params.motif_dir}"
     def loops_txt = "${inter_30_hic.simpleName}_loops.txt"
     """
-    export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
     mkdir -p "apa_results"
 
     cp ${merged_loops_dir}/merged_loops.bedpe ${loops_txt}
 
-    juicer_tools apa \\
+    /usr/local/bin/juicer_tools -Xmx${params.java_mem} apa \\
         --threads 1 \\
         ${inter_30_hic} \\
         ${merged_loops_dir}/merged_loops.bedpe \\
@@ -33,7 +34,7 @@ process MOTIF_FINDER {
         echo "***! Not running motif finder"
         touch ${loops_txt}
     else
-        juicer_tools motifs \\
+        /usr/local/bin/juicer_tools -Xmx${params.java_mem} motifs \\
             ${params.genome_id} \\
             ${motif_dir} \\
             ${loops_txt}

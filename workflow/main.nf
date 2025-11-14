@@ -254,7 +254,8 @@ workflow NFCORE_JUICER {
         .join(chimeric_by_sample)
         .join(merged_nodups)
 
-    stats_output = STATS(stats_input)
+    site_file = file(params.site_file)
+    stats_output = STATS(stats_input, site_file)
 
     hic_input = stats_output
         .map { sample, inter_txt, inter_30_txt, inter_hists_m, _collisions, _abnorm_sam, _unmapped_sam ->

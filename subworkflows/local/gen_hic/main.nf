@@ -14,7 +14,8 @@ workflow hic {
     }
 
     // output : tuple val(sample), path(inter_hic)
-    JUICER_TOOLS_PRE_Q1(pre_q1_ch)
+    site_file = file(params.site_file)
+    JUICER_TOOLS_PRE_Q1(pre_q1_ch, site_file)
 
     hic_stats_input = inter_ch.map { sample, _inter_txt, inter_30_txt, _inter_hists_m, merged_nodups ->
         tuple(sample, inter_30_txt, merged_nodups)
@@ -32,7 +33,7 @@ workflow hic {
         )
 
     // Input: tuple val(sample), path(merged_no_dups), path(inter_30_txt), path(inter_30_hists_m)
-    inter_30_hic_ch = JUICER_TOOLS_PRE_Q30(pre_q30_ch)
+    inter_30_hic_ch = JUICER_TOOLS_PRE_Q30(pre_q30_ch, site_file)
 
     emit:
     hic_out_ch = inter_30_hic_ch

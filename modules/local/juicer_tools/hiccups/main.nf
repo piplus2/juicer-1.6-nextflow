@@ -3,6 +3,8 @@ process HICCUPS {
     tag "${sample}"
     label "gpu"
 
+    container 'docker://pinglese6022/juicer_tools:1.22.01'
+
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
 
     input:
@@ -14,7 +16,6 @@ process HICCUPS {
     script:
     def out_loops = "${inter_30_hic.simpleName}_loops"
     """
-    export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
 
     mkdir -p ${out_loops}
@@ -26,7 +27,7 @@ process HICCUPS {
         fi
         args+="\"${inter_30_hic}\" \"${out_loops}\""
 
-        juicer_tools hiccups ${args}
+        /usr/local/bin/juicer_tools -Xmx${params.java_mem} hiccups ${args}
     else
         echo "ERROR: GPUs are required for HiCCUPS, but CUDA is not available." >&2
         exit 1

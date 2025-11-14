@@ -2,7 +2,7 @@ process HIC_STATS {
     tag "${sample}"
     label 'mediumcpu'
 
-    publishDir "${params.output_dir}/${sample}/aligned", mode: 'copy'
+    publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
     tuple val(sample), path(inter_30_txt), path(merged_nodups)

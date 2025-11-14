@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f
+#!/usr/bin/gawk -f
 ##########
 #The MIT License (MIT)
 #
@@ -25,8 +25,8 @@
 # Script to read in individual split outputs and put stats together
 # Juicer version 1.6
 {
-    total += $2;    
-    unmapped += $3; 
+    total += $2;
+    unmapped += $3;
     normal_paired += $4;
     chimeric_paired += $5;
     chimeric_ambiguous += $6;
