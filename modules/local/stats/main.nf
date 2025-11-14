@@ -12,7 +12,7 @@ process STATS {
 
     script:
     inter_txt = "inter.txt"
-    inter_hists_m = "${inter_txt.simpleName}_hists.m"
+    inter_hists_m = "inter_hists.m"
     inter_30_txt = "inter_30.txt"
     collisions_txt = "collisions.txt"
     abnormal_sam = "abnormal.sam"
