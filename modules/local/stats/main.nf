@@ -1,6 +1,6 @@
 process STATS {
     tag "${sample}"
-    label "mediumcpu"
+    label "highcpu"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
@@ -8,17 +8,18 @@ process STATS {
     tuple val(sample), path(header), path(res_txts), path(abnorm_sams), path(unmapped_sams), path(merged_nodups), path(dups_txt), path(opt_dups_txt)
 
     output:
-    tuple val(sample), path(inter_txt), path(inter_30_txt), path(inter_hists_m), path(collisions_txt), path(abnormal_sam), path(unmapped_sam)
+    tuple val(sample), path(inter_txt), path(inter_30_txt), path(inter_30_hists_m), path(collisions_txt), path(abnormal_sam), path(unmapped_sam)
 
     script:
     inter_txt = "inter.txt"
-    inter_hists_m = "inter_hists.m"
+    inter_30_hists_m = "inter_30_hists.m"
     inter_30_txt = "inter_30.txt"
     collisions_txt = "collisions.txt"
     abnormal_sam = "abnormal.sam"
     unmapped_sam = "unmapped.sam"
+
     """
-    export _JAVA_OPTIONS=-Xmx${params.java_mem}
+    export _JAVA_OPTIONS="-Xmx${params.java_mem} -Xms${params.java_mem}"
     export LC_ALL=en_US.UTF-8
 
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter_txt}
@@ -27,13 +28,11 @@ process STATS {
 
     cp ${inter_txt} ${inter_30_txt}
 
-    stat_cmd="statistics.pl"
-    if [[ -n "${params.site_file}" ]]; then
-        stat_cmd+=" -s \"${params.site_file}\""
+    if [[ -n ${params.site_file} ]]; then
+        statistics.pl -s ${params.site_file} -l ${params.ligation} -o ${inter_30_txt} -q 30 ${merged_nodups}
+    else
+        statistics.pl -l ${params.ligation} -o ${inter_30_txt} -q 30 ${merged_nodups}
     fi
-    stat_cmd+=" -l \"${params.ligation}\" -o \"${inter_txt}\" -q 1 \"${merged_nodups}\""
-
-    eval "\${stat_cmd}"
 
     cat ${abnorm_sams.join(' ')} > ${abnormal_sam}
     cat ${unmapped_sams.join(' ')} > ${unmapped_sam}
