@@ -26,6 +26,6 @@ process JUICER_TOOLS_PRE_Q30 {
         ${resolutions} \\
         ${merged_no_dups} \\
         ${output_file} \\
-        ${params.genomeID}
+        ${params.genome_id}
     """
 }

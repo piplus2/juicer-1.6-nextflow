@@ -26,6 +26,6 @@ process JUICER_TOOLS_PRE_Q1 {
         ${resolutions} \\
         ${input_file} \\
         ${output_file} \\
-        ${params.genomeID}
+        ${params.genome_id}
     """
 }
