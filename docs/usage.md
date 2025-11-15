@@ -2,16 +2,21 @@
 
 This document supplements the main `README.md` with additional tips for operating the nf-core flavoured Juicer pipeline.
 
+## Containers and dependencies
+
+The repository includes required Juicer helper scripts in the `bin/` directory.
+The user must enable either `singularity` or `docker` by selecting the appropriate profile, as the pipeline uses containers for `bwa-mem2`, `samtools`, and `juicer_tools`.
+
 ## Samplesheet format
 
 The workflow expects a comma-separated file with at least the columns below. Column names are case-insensitive and additional columns are ignored.
 
-| Column    | Description                                                                 |
-|-----------|-----------------------------------------------------------------------------|
-| `sample`  | Biological sample identifier.                                               |
-| `name`    | Library or lane identifier used to tag intermediate files.                  |
-| `fastq_1` | Absolute or relative path to the R1 FASTQ file.                              |
-| `fastq_2` | Absolute or relative path to the R2 FASTQ file.                              |
+| Column    | Description                                                |
+| --------- | ---------------------------------------------------------- |
+| `sample`  | Biological sample identifier.                              |
+| `name`    | Library or lane identifier used to tag intermediate files. |
+| `fastq_1` | Absolute or relative path to the R1 FASTQ file.            |
+| `fastq_2` | Absolute or relative path to the R2 FASTQ file.            |
 
 If the `name` column is omitted the pipeline derives it from the R1 file name by removing `--readstr1` and `--ext` (defaults `_R1_001` and `.fastq.gz`).
 
@@ -25,24 +30,27 @@ patient1,patient1_lane2,data/patient1_L002_R1.fastq.gz,data/patient1_L002_R2.fas
 
 ## Common parameters
 
-| Parameter | Purpose |
-|-----------|---------|
-| `--reference` | Reference genome FASTA. The path is validated before any process starts. |
-| `--genome_id` | Genome label passed to Juicer tools (e.g. `hg38`, `mm10`). |
-| `--site` | Restriction enzyme name (e.g. `arima`, `hindiii`). Automatically sets ligation motifs. |
-| `--site_file` | Override restriction site file if the automatic lookup does not match your genome. |
-| `--motif_dir` | Directory with motif definitions for the optional motif finding step. |
-| `--nofrag` | Skip fragment delimitation (`1` by default). Set to `0` to enable fragment-based maps. |
-| `--resolutions` | Comma-separated list of map resolutions passed to HiCCUPS and `.hic` generation. |
+| Parameter                  | Purpose                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| `--reference`              | Reference genome FASTA. The path is validated before any process starts.                         |
+| `--genome_id`              | Genome label passed to Juicer tools (e.g. `hg38`, `mm10`).                                       |
+| `--site`                   | Restriction enzyme name (e.g. `arima`, `hindiii`). Automatically sets ligation motifs.           |
+| `--site_file`              | Override restriction site file if the automatic lookup does not match your genome.               |
+| `--motif_dir`              | Directory with motif definitions for the optional motif finding step.                            |
+| `--nofrag`                 | Skip fragment delimitation (`1` by default). Set to `0` to enable fragment-based maps.           |
+| `--resolutions`            | Comma-separated list of map resolutions passed to HiCCUPS and `.hic` generation.                 |
 | `--save_merged_nodups_bam` | Set to 'false' to skip generating the deduplicated `merged_nodups.bam` output (default: 'true'). |
 
 ## Profiles
 
 - `standard`: Local execution suitable for development and small runs.
-- `hpc`: PBS Pro template; swap queue names or executor directives to match your scheduler (e.g. SLURM).
+- `pbs`: PBS template; swap queue names or executor directives to match your scheduler.
 - `test`: Convenience profile pointing to `assets/test_samplesheet.csv`. Replace placeholder paths before running.
 - `conda`: Enables Nextflow's conda support and disables containers (combine via `-profile standard,conda`).
 - `singularity`: Enables Singularity while disabling Docker (combine via `-profile standard,singularity`).
+- `docker`: Enables Docker while disabling Singularity (combine via `-profile standard,docker`).
+
+Either `singularity` or `docker` must be selected to run the containerized tools.
 
 ## Resource tuning
 
@@ -60,11 +68,8 @@ nextflow run . \
   --align_memory_gb 96 \
   --stats_memory_gb 48 \
   --hiccups_memory_gb 128
+  ...
 ```
-
-## Containers and dependencies
-
-The pipeline assumes Juicer helper scripts and binaries are available in `bin/` (added to the `PATH` via `conf/base.config`). Containers are only configured for `samtools`; feel free to extend the configuration with Singularity/Docker images for the remaining tools.
 
 ## GPU notes
 

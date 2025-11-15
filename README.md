@@ -40,6 +40,11 @@ sampleA,sampleA_lane1,/data/hi-c/sampleA_L001_R1.fastq.gz,/data/hi-c/sampleA_L00
 sampleA,sampleA_lane2,/data/hi-c/sampleA_L002_R1.fastq.gz,/data/hi-c/sampleA_L002_R2.fastq.gz
 ```
 
+## Containers and dependencies
+
+The repository includes required Juicer helper scripts in the `bin/` directory.
+The user must enable either `singularity` or `docker` by selecting the appropriate profile, as the pipeline uses containers for `bwa-mem2`, `samtools`, and `juicer_tools`.
+
 ## Quick start
 
 1. Install Nextflow and Java, then clone the repository:
@@ -63,7 +68,7 @@ sampleA,sampleA_lane2,/data/hi-c/sampleA_L002_R1.fastq.gz,/data/hi-c/sampleA_L00
      -profile standard
    ```
 
-Add `-profile hpc` for the PBS Pro executor, combine `conda` or `singularity` with other profiles (e.g. `-profile standard,singularity`), or create custom configs in `conf/`.
+Add `-profile pbs` for the PBS executor, combine `conda`, `singularity` or `docker` with other profiles (e.g. `-profile standard,singularity`), or create custom configs in `conf/`.
 
 ## Pipeline overview
 
@@ -73,7 +78,10 @@ Add `-profile hpc` for the PBS Pro executor, combine `conda` or `singularity` wi
 4. **Statistics & `.hic` generation** – Produces Juicer statistics (`inter.txt`, `inter_30.txt`, histograms) and `.hic` files at requested resolutions.
 5. **Post-processing & motif discovery** – Executes Arrowhead, HiCCUPS, and optional motif scanning using GPU resources when available.
 
-Results mimic the classic Juicer layout under `--outdir` (e.g. `aligned/`, `splits/`, `juicer_tools/arrowhead`, `juicer_tools/hiccups`, `juicer_tools/motifs`).
+Results mimic the classic Juicer layout under `--outdir` (e.g. `aligned/`, `splits/`).
+
+By default, the pipeline also exports the `merged_nodups` read in the BAM format for downstream analysis.
+To skip this step, set `--save_merged_nodups_bam false`.
 
 ## Configuration essentials
 
@@ -112,13 +120,9 @@ nextflow run . \
 
 Per-process overrides follow the `--<process>_cpus|memory_gb|time` convention (for example `--sam_to_bam_cpus 12`). See `docs/usage.md` for an expanded matrix and helper flags such as `--align_memory_gb`.
 
-## Containers and dependencies
-
-The repository includes required Juicer helper scripts in the `bin/` directory. By default, the pipeline uses containers for `bwa-mem2`, samtools`and`juicer_tools`. To run additional tools inside Singularity or Docker, extend the definitions in `conf/containers.config`. For cluster environments that use environment modules, set the appropriate `beforeScript`or`module` directives in your profile.
-
 ## Testing and development
 
-- Run smoke tests with `nextflow run . -profile test`.
+- Run smoke tests with `nextflow run . -profile test` (_work in progress_).
 - Import additional DSL2 modules under `modules/local/` or plug in nf-core/community modules for new features.
 - Add bespoke profiles inside `nextflow.config` or to dedicated files under `conf/`.
 
