@@ -96,7 +96,6 @@ All default parameters live in `nextflow.config`. Frequently tuned options:
 
 - `standard` – Local execution with conservative CPU/memory defaults.
 - `hpc` – PBS Pro template (swap queues and directives for SLURM or other schedulers).
-- `test` – Uses `assets/test_samplesheet.csv` for smoke tests; swap in your own miniature data.
 - `conda` / `singularity` – Enable each runtime; combine with other profiles as needed.
 
 ### Resource overrides
