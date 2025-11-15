@@ -20,7 +20,7 @@ process HICCUPS {
 
     mkdir -p ${out_loops}
 
-    if hash nvcc 2> /dev/null; then
+    if command -v nvidia-smi &> /dev/null; then
         args="--threads 0 --ignore-sparsity"
         if [[ -n "${params.resolutions}" ]]; then
             args+="-r \"${params.resolutions}\""
