@@ -3,7 +3,7 @@ process MOTIF_FINDER {
     tag "${sample}"
     label "gpu"
 
-    container 'docker://pinglese6022/juicer_tools:1.22.01'
+    container 'docker://pinglese6022/juicer_tools:1.13.01'
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
