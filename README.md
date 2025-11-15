@@ -114,7 +114,7 @@ Per-process overrides follow the `--<process>_cpus|memory_gb|time` convention (f
 
 ## Containers and dependencies
 
-The repository includes required Juicer helper scripts in the `bin/` directory. By default, the pipeline uses containers for `samtools` and `juicer_tools`. To run additional tools inside Singularity or Docker, extend the definitions in `conf/containers.config`. For cluster environments that use environment modules, set the appropriate `beforeScript` or `module` directives in your profile.
+The repository includes required Juicer helper scripts in the `bin/` directory. By default, the pipeline uses containers for `bwa-mem2`, samtools`and`juicer_tools`. To run additional tools inside Singularity or Docker, extend the definitions in `conf/containers.config`. For cluster environments that use environment modules, set the appropriate `beforeScript`or`module` directives in your profile.
 
 ## Testing and development
 
