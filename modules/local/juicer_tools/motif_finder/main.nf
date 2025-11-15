@@ -9,13 +9,13 @@ process MOTIF_FINDER {
 
     input:
     tuple val(sample), path(inter_30_hic), path(merged_loops_dir)
+    path motif_dir
 
     output:
     path "apa_results", type: 'dir'
     path "${inter_30_hic.simpleName}_loops_with_motifs.bedpe"
 
     script:
-    def motif_dir = params.motif_dir == null || params.motif_dir.toString() == "" ? "" : "${params.motif_dir}"
     def loops_txt = "${inter_30_hic.simpleName}_loops.txt"
     """
     export LC_ALL=en_US.UTF-8

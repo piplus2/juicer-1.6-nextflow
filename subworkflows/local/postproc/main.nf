@@ -16,7 +16,8 @@ workflow postprocessing {
         file("${_loops_dir}/merged_loops.bedpe").exists()
     }
 
-    MOTIF_FINDER(good_loops_dir)
+    motif_dir = Channel.fromPath(params.motif_dir, checkIfExists: true).first()
+    MOTIF_FINDER(good_loops_dir, motif_dir)
 
     emit:
     null
