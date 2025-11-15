@@ -3,6 +3,8 @@ process ARROWHEAD {
     tag "${sample}"
     label "gpu"
 
+    container 'docker://pinglese6022/juicer_tools:1.22.01'
+
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
@@ -14,12 +16,11 @@ process ARROWHEAD {
     script:
     def contact_domains = "${inter_30_hic.simpleName}_contact_domains"
     """
-    export _JAVA_OPTIONS=-Xmx${params.java_mem}
     export LC_ALL=en_US.UTF-8
 
     mkdir -p ${contact_domains}
 
-    juicer_tools arrowhead \\
+    /usr/local/bin/juicer_tools -Xmx${params.java_mem} arrowhead \\
         --threads 0 \\
         --ignore-sparsity \\
         ${inter_30_hic} \\
