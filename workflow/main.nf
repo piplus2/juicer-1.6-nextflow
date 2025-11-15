@@ -265,11 +265,7 @@ workflow NFCORE_JUICER {
 
     hic_out_ch = hic(hic_input)
 
-    inter_30_hic = hic_out_ch.map { sample, _inter_hic, inter_30_hic_file, _inter_30_hists ->
-        tuple(sample, inter_30_hic_file)
-    }
-
-    postprocessing(inter_30_hic)
+    postprocessing(hic_out_ch)
 
     emit:
     stats = stats_output

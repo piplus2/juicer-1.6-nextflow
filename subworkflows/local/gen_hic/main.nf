@@ -33,6 +33,7 @@ workflow hic {
         )
 
     // Input: tuple val(sample), path(merged_no_dups), path(inter_30_txt), path(inter_30_hists_m)
+    // Output: tuple val(sample), path(inter_30_hic)
     inter_30_hic_ch = JUICER_TOOLS_PRE_Q30(pre_q30_ch, site_file)
 
     emit:
