@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17619257.svg)](https://doi.org/10.5281/zenodo.17619257)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17619256.svg)](https://doi.org/10.5281/zenodo.17619256)
 
 # nf-core/juicer
 
@@ -145,14 +145,14 @@ Released under the MIT License. See `LICENSE` for the full text.
 ## Citation
 
 ```bibtex@
-software{paolo_inglese_2025_17619257,
+software{paolo_inglese_2025_17619256,
   author       = {Paolo Inglese},
   title        = {piplus2/juicer-1.6-nextflow: v.1.0.0-beta.1},
   month        = nov,
   year         = 2025,
   publisher    = {Zenodo},
   version      = {v1.0.0-beta.1},
-  doi          = {10.5281/zenodo.17619257},
-  url          = {https://doi.org/10.5281/zenodo.17619257},
+  doi          = {10.5281/zenodo.17619256},
+  url          = {https://doi.org/10.5281/zenodo.17619256},
 }
 ```
