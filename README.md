@@ -1,6 +1,6 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17619256.svg)](https://doi.org/10.5281/zenodo.17619256)
 
-# nf-core/juicer
+# Nexflow Juicer 1.6
 
 An nf-core inspired Nextflow DSL2 rewrite of the Juicer 1.6 Hi-C processing system. The project wraps the complete Juicer workflow—from FASTQ validation to Arrowhead, HiCCUPS, and motif discovery—inside a modular Nextflow pipeline so that large Hi-C projects can be reproduced on laptops, workstations, or schedulers with consistent configuration.
 
