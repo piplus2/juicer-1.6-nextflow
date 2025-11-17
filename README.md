@@ -46,6 +46,7 @@ sampleA,sampleA_lane2,/data/hi-c/sampleA_L002_R1.fastq.gz,/data/hi-c/sampleA_L00
 
 The repository includes required Juicer helper scripts in the `bin/` directory.
 The user must enable either `singularity` or `docker` by selecting the appropriate profile, as the pipeline uses containers for `bwa-mem2`, `samtools`, and `juicer_tools`.
+The Dockerfile used to generate Juicer Tools is available here: [docker-repo](https://github.com/piplus2/juicebox-juicertools-docker)
 
 ## Quick start
 
@@ -70,7 +71,7 @@ The user must enable either `singularity` or `docker` by selecting the appropria
      -profile standard
    ```
 
-Add `-profile pbs` for the PBS executor, combine `conda`, `singularity` or `docker` with other profiles (e.g. `-profile standard,singularity`), or create custom configs in `conf/`.
+Add `-profile pbs` for the PBS executor, combine `conda`, `singularity` or `docker` with other profiles (e.g. `-profile singularity`), or create custom configs in `conf/`.
 
 ## Pipeline overview
 
