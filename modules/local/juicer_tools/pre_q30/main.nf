@@ -1,8 +1,12 @@
 process JUICER_TOOLS_PRE_Q30 {
     tag "${sample}"
     label 'highcpu'
+    label "juicertools"
 
-    container 'docker://pinglese6022/juicer_tools:1.22.01'
+    env [
+        'LC_ALL': 'en_US.UTF-8',
+        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
+    ]
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
 
@@ -18,7 +22,7 @@ process JUICER_TOOLS_PRE_Q30 {
     def resolutions = params.resolutions == null || params.resolutions.toString() == "" ? "" : "-r ${params.resolutions}"
     def output_file = "${inter_30_txt.baseName}.hic"
     """
-    /usr/local/bin/juicer_tools -Xmx${params.java_mem} pre \\
+    juicer_tools pre \\
         ${site_opt} \\
         -s ${inter_30_txt} \\
         -g ${inter_30_hists_m} \\
