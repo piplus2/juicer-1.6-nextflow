@@ -19,7 +19,7 @@ An nf-core inspired Nextflow DSL2 rewrite of the Juicer 1.6 Hi-C processing syst
 - Java 11+
 - Juicer helper scripts (located in `bin/`)
 - `bwa-mem2`, `samtools`, `juicer_tools`, GNU coreutils, Perl, and AWK (calls to Docker containers in the scripts)
-- Optional CUDA-capable GPUs for HiCCUPS
+- Optional CUDA-capable GPUs for HiCCUPS - see [Quickstart](#quick-start) for only CPU run.
 
 Install tools through modules, Conda, Singularity, system packages, or your cluster environment.
 The bundled profiles assume binaries are on `PATH` (defined in `conf/base.config`).
