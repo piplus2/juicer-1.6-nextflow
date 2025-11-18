@@ -79,6 +79,8 @@ Add `-profile pbs` for the PBS executor, combine `singularity` or `docker` with 
 In the current version, a compiled version of Juicer Tools with GPU support is provided through either Singularity or Docker. \
 Conda support is in development.
 
+CPU version of Juicer Tools HiCCUPS can be run by adding the argument `--use_gpu false` to nextflow command.
+
 ## Pipeline overview
 
 1. **FASTQ validation & ligation counting** – Ensures paired files exist, counts ligation motifs, and prepares fragment metadata.

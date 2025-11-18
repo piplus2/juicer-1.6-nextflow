@@ -126,6 +126,27 @@ def validateParameters() {
         }
     }
 
+    if (params.use_gpu == null) {
+        params.use_gpu = true
+    }
+    else if (params.use_gpu instanceof Boolean) {
+    }
+    else if (params.use_gpu instanceof Number) {
+        params.use_gpu = params.use_gpu as Integer != 0
+    }
+    else {
+        def value = params.use_gpu.toString().toLowerCase()
+        if (value in ['true', '1', 'yes', 'y']) {
+            params.use_gpu = true
+        }
+        else if (value in ['false', '0', 'no', 'n']) {
+            params.use_gpu = false
+        }
+        else {
+            exit(1, "Parameter --use_gpu must be true or false")
+        }
+    }
+
     if (!params.site) {
         exit(1, "Parameter --site must be specified")
     }
