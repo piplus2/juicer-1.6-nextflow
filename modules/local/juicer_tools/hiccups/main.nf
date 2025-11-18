@@ -2,8 +2,12 @@
 process HICCUPS {
     tag "${sample}"
     label "gpu"
+    label "juicertools"
 
-    container 'docker://pinglese6022/juicer_tools:1.22.01'
+    env [
+        'LC_ALL': 'en_US.UTF-8',
+        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
+    ]
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
 
@@ -16,16 +20,21 @@ process HICCUPS {
     script:
     out_loops_dir = "${inter_30_hic.simpleName}_loops"
     """
-    export LC_ALL=en_US.UTF-8
-
     mkdir -p ${out_loops_dir}
-    if hash nvcc 2> /dev/null; then
-        /usr/local/bin/juicer_tools -Xmx${params.java_mem} hiccups --threads 0 --ignore-sparsity \\
+
+    if [[ ${params.use_gpu} == false]]; then
+        juicer_tools hiccups --cpu --threads ${task.cpus} --ignore-sparsity \\
             ${inter_30_hic} \\
             ${out_loops_dir}
     else
-        echo "ERROR: GPUs are required for HiCCUPS, but CUDA is not available." >&2
-        exit 1
+        if hash nvcc 2> /dev/null; then
+            juicer_tools hiccups --threads 0 --ignore-sparsity \\
+                ${inter_30_hic} \\
+                ${out_loops_dir}
+        else
+            echo "ERROR: GPUs are required for HiCCUPS, but CUDA is not available." >&2
+            exit 1
+        fi
     fi
     """
 }
