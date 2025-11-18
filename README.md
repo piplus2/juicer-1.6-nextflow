@@ -17,11 +17,12 @@ An nf-core inspired Nextflow DSL2 rewrite of the Juicer 1.6 Hi-C processing syst
 
 - [Nextflow](https://www.nextflow.io/) `>= 23.10.0`
 - Java 11+
-- Juicer helper scripts (already vendored in `bin/`)
-- `bwa-mem2`, `samtools`, `juicer_tools`, GNU coreutils, Perl, and AWK
-- Optional CUDA-capable GPUs for HiCCUPS and motif discovery stages
+- Juicer helper scripts (located in `bin/`)
+- `bwa-mem2`, `samtools`, `juicer_tools`, GNU coreutils, Perl, and AWK (calls to Docker containers in the scripts)
+- Optional CUDA-capable GPUs for HiCCUPS
 
-Install tools through modules, Conda, Singularity, system packages, or your cluster environment. The bundled profiles assume binaries are on `PATH`; adapt `conf/base.config` if you rely on containers or modules.
+Install tools through modules, Conda, Singularity, system packages, or your cluster environment.
+The bundled profiles assume binaries are on `PATH` (defined in `conf/base.config`).
 
 ## Inputs
 
@@ -42,11 +43,13 @@ sampleA,sampleA_lane1,/data/hi-c/sampleA_L001_R1.fastq.gz,/data/hi-c/sampleA_L00
 sampleA,sampleA_lane2,/data/hi-c/sampleA_L002_R1.fastq.gz,/data/hi-c/sampleA_L002_R2.fastq.gz
 ```
 
+The current version of the pipeline **does not** support fragmented input samples, but it expects each **sample** reads to be in a **single fastq** file.
+
 ## Containers and dependencies
 
 The repository includes required Juicer helper scripts in the `bin/` directory.
 The user must enable either `singularity` or `docker` by selecting the appropriate profile, as the pipeline uses containers for `bwa-mem2`, `samtools`, and `juicer_tools`.
-The Dockerfile used to generate Juicer Tools is available here: [docker-repo](https://github.com/piplus2/juicebox-juicertools-docker)
+The Dockerfile used to generate Juicer Tools is available here: https://github.com/piplus2/juicebox-juicertools-docker
 
 ## Quick start
 
@@ -71,7 +74,10 @@ The Dockerfile used to generate Juicer Tools is available here: [docker-repo](ht
      -profile standard
    ```
 
-Add `-profile pbs` for the PBS executor, combine `conda`, `singularity` or `docker` with other profiles (e.g. `-profile singularity`), or create custom configs in `conf/`.
+Add `-profile pbs` for the PBS executor, combine `singularity` or `docker` with other profiles (e.g. `-profile singularity`), or create custom configs in `conf/`.
+
+In the current version, a compiled version of Juicer Tools with GPU support is provided through either Singularity or Docker. \
+Conda support is in development.
 
 ## Pipeline overview
 
@@ -119,9 +125,10 @@ nextflow run . \
   --highcpu_memory_gb 128 \
   --align_cpus 24 \
   --hiccups_memory_gb 128
+  ...
 ```
 
-Per-process overrides follow the `--<process>_cpus|memory_gb|time` convention (for example `--sam_to_bam_cpus 12`). See `docs/usage.md` for an expanded matrix and helper flags such as `--align_memory_gb`.
+Per-process overrides follow the `--process_cpus|memory_gb|time` convention (for example `--sam_to_bam_cpus 12`). See `docs/usage.md` for an expanded matrix and helper flags such as `--align_memory_gb`.
 
 ## Testing and development
 
