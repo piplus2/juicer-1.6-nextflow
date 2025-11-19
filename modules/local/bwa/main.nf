@@ -11,7 +11,7 @@ process BWA_ALIGN {
     publishDir "${params.outdir}/${sample}/splits", mode: 'copy'
 
     input:
-    tuple val(sample), val(name), path(read1), path(read2)
+    tuple val(sample), val(name), path(read1), path(read2), path(index_dir)
 
     output:
     tuple val(sample), val(name), path(output_aligned)
@@ -19,7 +19,9 @@ process BWA_ALIGN {
     script:
     output_aligned = "${name}${params.ext}.sam"
     """
-    bwa-mem2 mem -SP5M -t ${task.cpus} ${params.reference} \\
+    cp -r ${index_dir}/* .
+
+    bwa-mem2 mem -SP5M -t ${task.cpus} bwa_index \\
         ${read1} ${read2} > ${output_aligned}
     """
 }

@@ -3,12 +3,7 @@ process STATS {
     label "highcpu"
     label "juicertools"
 
-    containerOptions "-B ${baseDir}/bin:/workflow/bin"
-
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
+    containerOptions "-B ${projectDir}/bin:/workflow/bin --env PATH=/workflow/bin:/usr/bin:/usr/local/bin:/bin:/opt/java/openjdk/bin"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
@@ -17,29 +12,29 @@ process STATS {
     path site_file
 
     output:
-    tuple val(sample), path(inter_txt), path(inter_30_txt), path(inter_30_hists_m), path(collisions_txt), path(abnormal_sam), path(unmapped_sam)
+    tuple val(sample), path(inter_txt), path(inter_filt_txt), path(inter_hists_m), path(collisions_txt), path(abnormal_sam), path(unmapped_sam)
 
     script:
     inter_txt = "inter.txt"
-    inter_30_hists_m = "inter_30_hists.m"
-    inter_30_txt = "inter_30.txt"
+    inter_hists_m = "inter_hists.m"
+    inter_filt_txt = "inter_${params.mapq}.txt"
     collisions_txt = "collisions.txt"
     abnormal_sam = "abnormal.sam"
     unmapped_sam = "unmapped.sam"
     """
     export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+    export PATH=\"/workflow/bin:\${PATH}\"
+
+    ls -l /workflow/bin/
 
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter_txt}
     cat ${res_txts.join(' ')} | stats_sub.awk >> ${inter_txt}
     juicer_tools LibraryComplexity "./" ${inter_txt} >> ${inter_txt}
 
-    cp ${inter_txt} ${inter_30_txt}
+    cp ${inter_txt} ${inter_filt_txt}
 
-    if [[ -n ${site_file} ]]; then
-        perl statistics.pl -s ${site_file} -l ${params.ligation} -o ${inter_30_txt} -q 30 ${merged_nodups}
-    else
-        perl statistics.pl -l ${params.ligation} -o ${inter_30_txt} -q 30 ${merged_nodups}
-    fi
+    statistics.pl -s ${site_file} -l ${params.ligation} -o ${inter_txt} -q 1 ${merged_nodups}
 
     cat ${abnorm_sams.join(' ')} > ${abnormal_sam}
     cat ${unmapped_sams.join(' ')} > ${unmapped_sam}

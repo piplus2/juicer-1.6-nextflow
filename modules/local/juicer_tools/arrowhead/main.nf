@@ -1,31 +1,29 @@
 // Process: Arrowhead (contact domain calling)
 process ARROWHEAD {
     tag "${sample}"
-    label "highcpu"
-    label "juicertools"
-
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
+    label "highmemory"
+    label "juicertools_1_22"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
-    tuple val(sample), path(inter_30_hic)
+    tuple val(sample), path(inter_filt_hic)
 
     output:
-    path "${inter_30_hic.simpleName}_contact_domains", type: 'dir'
+    path contact_domains, type: 'dir'
 
     script:
-    def contact_domains = "${inter_30_hic.simpleName}_contact_domains"
+    contact_domains = "${inter_filt_hic.simpleName}_contact_domains"
     """
+    export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+
     mkdir -p ${contact_domains}
 
     juicer_tools arrowhead \\
         --threads 0 \\
         --ignore-sparsity \\
-        ${inter_30_hic} \\
+        ${inter_filt_hic} \\
         ${contact_domains}
     """
 }

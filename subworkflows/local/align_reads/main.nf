@@ -3,6 +3,7 @@ include { SORT               } from '../../../modules/local/sort_reads'
 include { CONVERT_FRAGMENTS  } from '../../../modules/local/fragments'
 include { BWA_ALIGN          } from '../../../modules/local/bwa'
 include { COUNT_LIGATIONS    } from '../../../modules/local/count_ligations'
+include { PREPARE_BWA_INDEX  } from '../../../modules/local/bwa_index'
 
 
 workflow process_fragments {
@@ -14,8 +15,10 @@ workflow process_fragments {
     // output = (sample, name, init_norm_res, linecount)
     init_norm_res = COUNT_LIGATIONS(reads)
 
+    index_dir = PREPARE_BWA_INDEX(params.reference)
+
     // output = (sample, name, aligned_sam)
-    aligned_sams = BWA_ALIGN(reads)
+    aligned_sams = BWA_ALIGN(reads.combine(index_dir))
 
     // Prepare CHIMERIC inputs
     chimeric_input_ch = init_norm_res

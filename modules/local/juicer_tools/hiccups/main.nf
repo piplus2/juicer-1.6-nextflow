@@ -2,12 +2,7 @@
 process HICCUPS {
     tag "${sample}"
     label "gpu"
-    label "juicertools"
-
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
+    label "juicertools_1_22"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
 
@@ -20,15 +15,18 @@ process HICCUPS {
     script:
     out_loops_dir = "${inter_30_hic.simpleName}_loops"
     """
+    export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+
     mkdir -p ${out_loops_dir}
 
-    if [[ ${params.use_gpu} == false]]; then
-        juicer_tools hiccups --cpu --threads ${task.cpus} --ignore-sparsity \\
+    if [[ ${params.use_gpu} == false ]]; then
+        juicer_tools hiccups --cpu --threads ${task.cpus} \\
             ${inter_30_hic} \\
             ${out_loops_dir}
     else
         if hash nvcc 2> /dev/null; then
-            juicer_tools hiccups --threads 0 --ignore-sparsity \\
+            juicer_tools hiccups --threads 0 \\
                 ${inter_30_hic} \\
                 ${out_loops_dir}
         else

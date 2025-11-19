@@ -3,11 +3,6 @@ process MOTIF_FINDER {
     tag "${sample}"
     label "highcpu"
 
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
-
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
@@ -21,6 +16,9 @@ process MOTIF_FINDER {
     script:
     def loops_txt = "${inter_30_hic.simpleName}_loops.txt"
     """
+    export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+
     mkdir -p "apa_results"
 
     cp ${merged_loops_dir}/merged_loops.bedpe ${loops_txt}
