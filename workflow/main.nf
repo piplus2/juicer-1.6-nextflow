@@ -71,6 +71,11 @@ def buildFastqChannel() {
 }
 
 def validateParameters() {
+
+    if (!params.input) {
+        exit(1, "Parameter --input is required")
+    }
+
     if (!params.outdir) {
         params.outdir = "${launchDir}/results"
     }
@@ -217,11 +222,14 @@ def displayInfo() {
     println("Genome ID:              ${params.genome_id}")
     println("Restriction site:       ${params.site} (${params.ligation})")
     println("Restriction site file:  ${params.site_file}")
+    println("Input samplesheet:      ${params.input}")
     println("Output directory:       ${params.outdir}")
     println("Save merged no-dup BAM: ${params.save_merged_nodups_bam}")
     println("Read 1 suffix:         '${params.readstr1}'")
     println("Read 2 suffix:         '${params.readstr2}'")
     println("FASTQ extension:        '${params.ext}'")
+    println("MAPQ threshold:         ${params.mapq}")
+    println("Use GPU acceleration:   ${params.use_gpu}")
     println("No fragment filtering:  ${params.nofrag}")
     println("Just exact matches:     ${params.justexact}")
     println("Resolutions:            ${params.resolutions}")
@@ -279,8 +287,8 @@ workflow NFCORE_JUICER {
     stats_output = STATS(stats_input, site_file)
 
     hic_input = stats_output
-        .map { sample, inter_txt, inter_30_txt, inter_hists_m, _collisions, _abnorm_sam, _unmapped_sam ->
-            tuple(sample, inter_txt, inter_30_txt, inter_hists_m)
+        .map { sample, inter_txt, inter_filt_txt, inter_hists_m, _collisions, _abnorm_sam, _unmapped_sam ->
+            tuple(sample, inter_txt, inter_filt_txt, inter_hists_m)
         }
         .join(nodups)
 

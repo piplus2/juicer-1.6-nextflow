@@ -1,7 +1,7 @@
 process JUICER_TOOLS_PRE_Q1 {
     tag "${sample}"
     label 'highcpu'
-    label "juicertools"
+    label "juicertools_1_22"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
 
@@ -10,12 +10,12 @@ process JUICER_TOOLS_PRE_Q1 {
     path site_file
 
     output:
-    tuple val(sample), path("${input_file.baseName}.hic")
+    tuple val(sample), path(output_file)
 
     script:
     def site_opt = params.nofrag.toString() == "1" ? "" : "-f ${site_file}"
     def resolutions = params.resolutions == null || params.resolutions.toString() == "" ? "" : "-r ${params.resolutions}"
-    def output_file = "${input_file.baseName}.hic"
+    output_file = "inter.hic"
     """
     export LC_ALL=en_US.UTF-8
     export _JAVA_OPTIONS="-Xmx${params.java_mem}"
