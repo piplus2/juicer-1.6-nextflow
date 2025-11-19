@@ -4,4 +4,4 @@ work/
 *.log
 *.fastq.gz
 *.fsa
-
+results/
