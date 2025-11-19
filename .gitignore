@@ -2,3 +2,6 @@
 work/
 .nextflow
 *.log
+*.fastq.gz
+*.fsa
+
