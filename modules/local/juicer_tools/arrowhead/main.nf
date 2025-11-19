@@ -1,13 +1,8 @@
 // Process: Arrowhead (contact domain calling)
 process ARROWHEAD {
     tag "${sample}"
-    label "highcpu"
+    label "highmemory"
     label "juicertools"
-
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
@@ -20,6 +15,9 @@ process ARROWHEAD {
     script:
     def contact_domains = "${inter_30_hic.simpleName}_contact_domains"
     """
+    export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+
     mkdir -p ${contact_domains}
 
     juicer_tools arrowhead \\

@@ -3,11 +3,6 @@ process JUICER_TOOLS_PRE_Q1 {
     label 'highcpu'
     label "juicertools"
 
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
-
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
 
     input:
@@ -22,6 +17,9 @@ process JUICER_TOOLS_PRE_Q1 {
     def resolutions = params.resolutions == null || params.resolutions.toString() == "" ? "" : "-r ${params.resolutions}"
     def output_file = "${input_file.baseName}.hic"
     """
+    export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+
     juicer_tools pre ${site_opt} -s ${inter} -g ${inter_hists} -q 1 ${resolutions} ${input_file} ${output_file} ${params.genome_id}
     """
 }

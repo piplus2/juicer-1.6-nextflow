@@ -4,11 +4,6 @@ process HICCUPS {
     label "gpu"
     label "juicertools"
 
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
-
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "${inter_30_hic.simpleName}_loops"
 
     input:
@@ -20,6 +15,9 @@ process HICCUPS {
     script:
     out_loops_dir = "${inter_30_hic.simpleName}_loops"
     """
+    export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
+
     mkdir -p ${out_loops_dir}
 
     if [[ ${params.use_gpu} == false]]; then

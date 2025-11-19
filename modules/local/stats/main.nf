@@ -5,11 +5,6 @@ process STATS {
 
     containerOptions "-B ${baseDir}/bin:/workflow/bin"
 
-    env [
-        'LC_ALL': 'en_US.UTF-8',
-        '_JAVA_OPTIONS': "-Xmx${params.java_mem}",
-    ]
-
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
@@ -28,6 +23,7 @@ process STATS {
     unmapped_sam = "unmapped.sam"
     """
     export LC_ALL=en_US.UTF-8
+    export _JAVA_OPTIONS="-Xmx${params.java_mem}"
 
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter_txt}
     cat ${res_txts.join(' ')} | stats_sub.awk >> ${inter_txt}
