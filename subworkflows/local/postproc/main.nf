@@ -17,7 +17,9 @@ workflow postprocessing {
     }
 
     motif_dir = Channel.fromPath(params.motif_dir, checkIfExists: true).first()
-    MOTIF_FINDER(good_loops_dir, motif_dir)
+    if (!params.skip_motif_finder) {
+        MOTIF_FINDER(good_loops_dir, motif_dir)
+    }
 
     emit:
     null

@@ -208,6 +208,27 @@ def validateParameters() {
     if (!params.ext) {
         params.ext = '.fastq.gz'
     }
+
+    if (params.skip_motif_finder == null) {
+        params.skip_motif_finder = false
+    }
+    else if (params.skip_motif_finder instanceof Boolean) {
+    }
+    else if (params.skip_motif_finder instanceof Number) {
+        params.skip_motif_finder = params.skip_motif_finder as Integer != 0
+    }
+    else {
+        def value = params.skip_motif_finder.toString().toLowerCase()
+        if (value in ['true', '1', 'yes', 'y']) {
+            params.skip_motif_finder = true
+        }
+        else if (value in ['false', '0', 'no', 'n']) {
+            params.skip_motif_finder = false
+        }
+        else {
+            exit(1, "Parameter --skip_motif_finder must be true or false")
+        }
+    }
 }
 
 
