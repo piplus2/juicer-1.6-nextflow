@@ -1,15 +1,11 @@
-nextflow.enable.dsl = 2
-
-include { process_fragments     } from '../subworkflows/local/align_reads'
-include { postprocessing        } from '../subworkflows/local/postproc'
-include { EXPORT_BAM            } from '../subworkflows/local/export_bam'
-include { REMOVE_DUPLICATES_SAM } from '../modules/local/bam/remove_dups_sam'
-include { hic                   } from '../subworkflows/local/gen_hic'
-include { STATS                 } from '../modules/local/stats'
-include { MAKE_HEADERFILE       } from '../modules/local/header'
-include { MERGE_SORT            } from '../modules/local/merge_sort'
-include { REMOVE_DUPLICATES     } from '../modules/local/remove_dups'
-include { MERGE_SORT_SAM        } from '../modules/local/bam/merge_and_sort'
+include { process_fragments } from '../subworkflows/local/align_reads'
+include { postprocessing    } from '../subworkflows/local/postproc'
+include { EXPORT_BAM        } from '../subworkflows/local/export_bam'
+include { hic               } from '../subworkflows/local/gen_hic'
+include { STATS             } from '../modules/local/stats'
+include { MAKE_HEADERFILE   } from '../modules/local/header'
+include { MERGE_SORT        } from '../modules/local/merge_sort'
+include { REMOVE_DUPLICATES } from '../modules/local/remove_dups'
 
 def buildFastqChannel() {
     if (!params.input) {

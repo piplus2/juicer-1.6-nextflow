@@ -34,5 +34,5 @@ workflow EXPORT_BAM {
     PICARD_FILTERSAMREADS(SAMTOOLS_SORT.out.bam, ch_id_list.map { _meta, ids -> ids })
 
     emit:
-    bam = PICARD_FILTERSAMREADS.out_bam
+    bam = PICARD_FILTERSAMREADS.out.bam
 }
