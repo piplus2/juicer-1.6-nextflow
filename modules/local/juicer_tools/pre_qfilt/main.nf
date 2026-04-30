@@ -1,7 +1,7 @@
 process JUICER_TOOLS_PRE_QFILT {
     tag "${sample}"
     label 'highcpu'
-    label "juicertools"
+    label "juicertools_1_22"
 
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy', pattern: "*.hic"
 
