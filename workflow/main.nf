@@ -258,7 +258,7 @@ def displayInfo() {
 }
 
 
-workflow NFCORE_JUICER {
+workflow JUICER {
     main:
     validateParameters()
     displayInfo()
