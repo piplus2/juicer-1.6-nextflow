@@ -1,4 +1,4 @@
-// Process: APA (aggregated peak analysis)
+// Process: MOTIF_FINDER (aggregated peak analysis)
 process MOTIF_FINDER {
     tag "${sample}"
     label "highcpu"
