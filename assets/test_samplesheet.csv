@@ -1,2 +1,2 @@
 sample,name,fastq_1,fastq_2
-sampleA,sampleA,https://github.com/nf-core/test-datasets/blob/hic/data/SRR4292758_00_R1.fastq.gz,https://github.com/nf-core/test-datasets/blob/hic/data/SRR4292758_00_R2.fastq.gz
+sampleA,sampleA,https://github.com/nf-core/test-datasets/raw/refs/heads/hic/data/SRR4292758_00_R1.fastq.gz,https://github.com/nf-core/test-datasets/raw/refs/heads/hic/data/SRR4292758_00_R2.fastq.gz

@@ -6,17 +6,16 @@ include { BWA_INDEX          } from '../../../modules/nf-core/bwa/index'
 include { BWA_MEM            } from '../../../modules/nf-core/bwa/mem/main.nf'
 
 
-workflow process_fragments {
+workflow PROCESS_FRAGMENTS {
     take:
-    reads // Expecting: [sample, name, r1, r2]
+    reads     // Expecting: [sample, name, r1, r2]
+    reference // Expecting a reference fasta file
 
     main:
 
-    ref_file = file(params.reference)
-
     // TODO: this must go into the future PROCESS_GENOME module, but for now we need it here to prepare the BWA index
-    ch_index = BWA_INDEX([[id: ref_file.baseName], ref_file]).index
-    ch_fasta = [[id: ref_file.baseName], ref_file]
+    ch_index = BWA_INDEX([[id: reference.baseName], reference]).index
+    ch_fasta = [[id: reference.baseName], reference]
 
     // BWA_MEM expects [ [id: sample_name ], [r1, r2] ]
     ch_bwa_input = reads.map { sample, name, r1, r2 ->
@@ -24,10 +23,11 @@ workflow process_fragments {
         [meta, [r1, r2]]
     }
 
-    BWA_MEM(ch_bwa_input, ch_index, ch_fasta, sort_bam: false)
+    BWA_MEM(ch_bwa_input, ch_index, ch_fasta, false)
 
-    aligned_sams = BWA_MEM.out.bam.map { meta, bam ->
-        tuple(meta.sample, meta.name, bam)
+    // The aligned files are in the SAM format although they have a .bam extension
+    aligned_sams = BWA_MEM.out.sam.map { meta, sam ->
+        tuple(meta.sample, meta.name, sam)
     }
 
     // Prepare CHIMERIC inputs
@@ -55,4 +55,5 @@ workflow process_fragments {
     emit:
     chimeric_output  = chimeric
     sorted_fragments = sorted_files
+    aligned_sams     = aligned_sams
 }

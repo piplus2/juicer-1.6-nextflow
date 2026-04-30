@@ -18,6 +18,8 @@ process BWA_MEM {
     tuple val(meta), path("*.cram") , emit: cram,   optional: true
     tuple val(meta), path("*.csi")  , emit: csi,    optional: true
     tuple val(meta), path("*.crai") , emit: crai,   optional: true
+    // Patch to emit SAM files
+    tuple val(meta), path("*.sam")  , emit: sam,    optional: true
     tuple val("${task.process}"), val('bwa'), eval('bwa 2>&1 | sed -n "s/^Version: //p"'), topic: versions, emit: versions_bwa
     tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), topic: versions, emit: versions_samtools
 

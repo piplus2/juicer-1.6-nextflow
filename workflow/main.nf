@@ -1,4 +1,4 @@
-include { process_fragments } from '../subworkflows/local/align_reads'
+include { PROCESS_FRAGMENTS } from '../subworkflows/local/align_reads'
 include { postprocessing    } from '../subworkflows/local/postproc'
 include { EXPORT_BAM        } from '../subworkflows/local/export_bam'
 include { hic               } from '../subworkflows/local/gen_hic'
@@ -6,6 +6,7 @@ include { STATS             } from '../modules/local/stats'
 include { MAKE_HEADERFILE   } from '../modules/local/header'
 include { MERGE_SORT        } from '../modules/local/merge_sort'
 include { REMOVE_DUPLICATES } from '../modules/local/remove_dups'
+include { SAMTOOLS_MERGE    } from '../modules/nf-core/samtools/merge/main.nf'
 
 def buildFastqChannel() {
     if (!params.input) {
@@ -264,10 +265,13 @@ workflow NFCORE_JUICER {
         fastq_pairs.map { sample, _name, _read1, _read2 -> sample }.distinct()
     )
 
-    frag_results = process_fragments(fastq_pairs)
+    ref_file = file(params.reference, checkIfExists: true)
+
+    frag_results = PROCESS_FRAGMENTS(fastq_pairs, ref_file)
 
     chimeric_reads = frag_results.chimeric_output
     sorted_fragments = frag_results.sorted_fragments
+    aligned_sams = frag_results.aligned_sams
 
     sort_files_by_sample = sorted_fragments.groupTuple(by: 0)
 
@@ -279,7 +283,7 @@ workflow NFCORE_JUICER {
     }
 
     if (params.save_merged_nodups_bam) {
-        EXPORT_BAM(chimeric_reads, merged_nodups)
+        EXPORT_BAM(aligned_sams, nodups)
     }
 
     chimeric_by_sample = chimeric_reads

@@ -4,16 +4,16 @@ include { PICARD_FILTERSAMREADS } from '../../../modules/nf-core/picard/filtersa
 
 workflow EXPORT_BAM {
     take:
-    chimeric_reads // Expect a tuple of (sample, name, norm_txt, abnorm_sam, unmapped_sam, norm_sam, norm_res_txt)
-    dedup          // Expect a tuple of (sample, merged_nodups, dups, opt_dups)
+    aligned_sams // Expect a tuple of (sample, name, norm_txt, abnorm_sam, unmapped_sam, norm_sam, norm_res_txt)
+    dedup        // Expect a tuple of (sample, merged_nodups, dups, opt_dups)
 
     main:
     // Group the normalized SAM files by sample and create the nf-core [meta, [files]] structure
     // We use groupTuple to group by sample, and then map to create the tuple structure expected by SAMTOOLS_VIEW
-    ch_to_sort = chimeric_reads
-        .map { sample, _name, _txt, _ab, _un, norm_sam, _res ->
+    ch_to_sort = aligned_sams
+        .map { sample, _name, sam ->
             def meta = [id: sample, sample: sample]
-            return [meta, norm_sam]
+            return [meta, sam]
         }
         .groupTuple(by: 0)
 
@@ -23,10 +23,16 @@ workflow EXPORT_BAM {
     SAMTOOLS_SORT(ch_to_sort, [[:], [], []], 'bai')
 
     // Get the deduplicated IDs from merged_nodups
-    ch_id_list = dedup.map { sample, nodups, _dups, _opt_dups ->
+    ch_id_list = dedup.map { sample, nodups ->
         def id_list = file("${sample}_allowed_ids.txt")
         // Column 15 and 16 contain the QNAME in merged_nodups
-        id_list.text = nodups.splitEachLine("\\s+") { it -> it[14] + "\\n" + it[15] }.join()
+        def text = ""
+        nodups.splitEachLine("\\s+") { cols ->
+            if (cols.size() >= 16) {
+                text += cols[14] + "\n" + cols[15] + "\n"
+            }
+        }
+        id_list.text = text
         return [[id: sample, sample: sample], id_list]
     }
 

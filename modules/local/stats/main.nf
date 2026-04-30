@@ -3,8 +3,6 @@ process STATS {
     label "highcpu"
     label "juicertools"
 
-    containerOptions "-B ${projectDir}/bin:/workflow/bin --env PATH=/workflow/bin:/usr/bin:/usr/local/bin:/bin:/opt/java/openjdk/bin"
-
     publishDir "${params.outdir}/${sample}/aligned", mode: 'copy'
 
     input:
@@ -25,8 +23,6 @@ process STATS {
     export LC_ALL=en_US.UTF-8
     export _JAVA_OPTIONS="-Xmx${params.java_mem}"
     export PATH=\"/workflow/bin:\${PATH}\"
-
-    ls -l /workflow/bin/
 
     tail -n1 ${header} | awk '{printf "%-1000s\\n", \$0}' > ${inter_txt}
     cat ${res_txts.join(' ')} | stats_sub.awk >> ${inter_txt}
