@@ -2,6 +2,7 @@ nextflow.enable.dsl = 2
 
 include { process_fragments     } from '../subworkflows/local/align_reads'
 include { postprocessing        } from '../subworkflows/local/postproc'
+include { EXPORT_BAM            } from '../subworkflows/local/export_bam'
 include { REMOVE_DUPLICATES_SAM } from '../modules/local/bam/remove_dups_sam'
 include { SAM_TO_BAM            } from '../modules/local/bam/convert_to_bam'
 include { hic                   } from '../subworkflows/local/gen_hic'
@@ -283,15 +284,7 @@ workflow NFCORE_JUICER {
     }
 
     if (params.save_merged_nodups_bam) {
-        norm_sam_by_sample = chimeric_reads
-            .map { sample, _name, _norm_txt, _abnorm_sam, _unmapped_sam, norm_sam, _norm_res_txt ->
-                tuple(sample, norm_sam)
-            }
-            .groupTuple(by: 0)
-
-        merged_sam = MERGE_SORT_SAM(norm_sam_by_sample)
-        def merged_nodups_by_sample = nodups.join(merged_sam)
-        SAM_TO_BAM(REMOVE_DUPLICATES_SAM(merged_nodups_by_sample))
+        EXPORT_BAM(chimeric_reads, merged_nodups)
     }
 
     chimeric_by_sample = chimeric_reads

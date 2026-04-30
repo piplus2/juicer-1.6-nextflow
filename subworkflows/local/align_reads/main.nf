@@ -1,26 +1,37 @@
 include { BLACKLIST_CHIMERIC } from '../../../modules/local/chimeric'
 include { SORT               } from '../../../modules/local/sort_reads'
 include { CONVERT_FRAGMENTS  } from '../../../modules/local/fragments'
-include { BWA_ALIGN          } from '../../../modules/local/bwa'
 include { COUNT_LIGATIONS    } from '../../../modules/local/count_ligations'
-include { PREPARE_BWA_INDEX  } from '../../../modules/local/bwa_index'
+include { BWA_INDEX          } from '../../../modules/nf-core/bwa/index'
+include { BWA_MEM            } from '../../../modules/nf-core/bwa/mem/main.nf'
 
 
 workflow process_fragments {
     take:
-    reads
+    reads // Expecting: [sample, name, r1, r2]
 
     main:
 
-    // output = (sample, name, init_norm_res, linecount)
-    init_norm_res = COUNT_LIGATIONS(reads)
+    ref_file = file(params.reference)
 
-    index_dir = PREPARE_BWA_INDEX(params.reference)
+    // TODO: this must go into the future PROCESS_GENOME module, but for now we need it here to prepare the BWA index
+    ch_index = BWA_INDEX([[id: ref_file.baseName], ref_file]).index
+    ch_fasta = [[id: ref_file.baseName], ref_file]
 
-    // output = (sample, name, aligned_sam)
-    aligned_sams = BWA_ALIGN(reads.combine(index_dir))
+    // BWA_MEM expects [ [id: sample_name ], [r1, r2] ]
+    ch_bwa_input = reads.map { sample, name, r1, r2 ->
+        def meta = [id: "${sample}-${name}", sample: sample, name: name]
+        [meta, [r1, r2]]
+    }
+
+    BWA_MEM(ch_bwa_input, ch_index, ch_fasta, sort_bam: false)
+
+    aligned_sams = BWA_MEM.out.bam.map { meta, bam ->
+        tuple(meta.sample, meta.name, bam)
+    }
 
     // Prepare CHIMERIC inputs
+    init_norm_res = COUNT_LIGATIONS(reads)
     chimeric_input_ch = init_norm_res
         .map { sample, name, norm_res_txt, _linecount ->
             tuple(sample, name, norm_res_txt)
