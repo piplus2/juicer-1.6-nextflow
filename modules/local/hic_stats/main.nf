@@ -19,7 +19,7 @@ process HIC_STATS {
 
     statistics.pl \\
         -s ${params.site_file} \\
-        -l ${params.ligation} \\
+        -l ${params.ligation_map} \\
         -o ${inter_filt_local_txt} \\
         -q ${params.mapq} \\
         ${merged_nodups}

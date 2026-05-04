@@ -30,7 +30,7 @@ process STATS {
 
     cp ${inter_txt} ${inter_filt_txt}
 
-    statistics.pl -s ${site_file} -l ${params.ligation} -o ${inter_txt} -q 1 ${merged_nodups}
+    statistics.pl -s ${site_file} -l ${params.ligation_map} -o ${inter_txt} -q 1 ${merged_nodups}
 
     cat ${abnorm_sams.join(' ')} > ${abnormal_sam}
     cat ${unmapped_sams.join(' ')} > ${unmapped_sam}

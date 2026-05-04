@@ -255,7 +255,7 @@ def displayInfo() {
 }
 
 
-workflow NFCORE_JUICER {
+workflow JUICER {
     main:
     validateParameters()
     displayInfo()
@@ -297,19 +297,19 @@ workflow NFCORE_JUICER {
         .join(merged_nodups)
 
     site_file = file(params.site_file)
-    stats_output = STATS(stats_input, site_file)
+    stats_ch = STATS(stats_input, site_file)
 
-    hic_input = stats_output
+    hic_input_ch = stats_ch
         .map { sample, inter_txt, inter_filt_txt, inter_hists_m, _collisions, _abnorm_sam, _unmapped_sam ->
             tuple(sample, inter_txt, inter_filt_txt, inter_hists_m)
         }
         .join(nodups)
 
-    hic_out_ch = hic(hic_input)
+    hic_out_ch = hic(hic_input_ch)
 
     postprocessing(hic_out_ch)
 
     emit:
-    stats = stats_output
+    stats = stats_ch
     hic   = hic_out_ch
 }

@@ -1,7 +1,18 @@
-include { NFCORE_JUICER } from './workflow/main.nf'
+include { JUICER } from './workflows/juicer.nf'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_pipeline/main.nf'
 
 workflow {
-    // TODO: make a PREPARE_GENOME process that prepares the genome for juicer, and then pass the prepared genome to NFCORE_JUICER
+    main:
 
-    NFCORE_JUICER()
+        // TODO: complete the pipeline initialisation
+        PIPELINE_INITIALISATION(
+            params.input,
+            params.outdir,
+            args,
+            params.version
+        )
+
+        // TODO: add workflow for preparing the genome
+
+        JUICER()
 }

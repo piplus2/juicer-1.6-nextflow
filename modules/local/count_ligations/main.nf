@@ -22,14 +22,14 @@ process COUNT_LIGATIONS {
         usegzip=1
     fi
 
-    if [[ -z "${params.ligation}" || "${params.ligation}" == "XXXX" ]]; then
+    if [[ -z "${params.ligation_map}" || "${params.ligation_map}" == "XXXX" ]]; then
         echo "Skipping ligation match counting due to unset or 'XXXX' ligation motif"
         num1=0
     else
         if [[ \$usegzip -eq 1 ]]; then
-            num1=\$(paste <(gunzip -c ${read1}) <(gunzip -c ${read2}) | awk '!((NR+2)%4)' | grep -cE ${params.ligation})
+            num1=\$(paste <(gunzip -c ${read1}) <(gunzip -c ${read2}) | awk '!((NR+2)%4)' | grep -cE ${params.ligation_map})
         else
-            num1=\$(paste ${read1} ${read2} | awk '!((NR+2)%4)' | grep -cE "${params.ligation}")
+            num1=\$(paste ${read1} ${read2} | awk '!((NR+2)%4)' | grep -cE "${params.ligation_map}")
         fi
     fi
 
